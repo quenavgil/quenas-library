@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Quena's Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --cream: #FAF6F1;
+    --blush: #E8C4B8;
+    --rose: #C97B84;
+    --deep: #3D2B35;
+    --plum: #6B3A4F;
+    --gold: #C9A96E;
+    --sage: #8A9E8C;
+    --text: #2C1D25;
+    --muted: #9B7E8A;
+    --card: #FFFFFF;
+    --border: #EDE0D8;
+    --chili: #E05C5C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  button, [onclick], .tab, .filter-chip, .book-card, .trope-option, .format-btn, .thumb-btn, .couple-book-item, .shelf-book-spine { touch-action: manipulation; cursor: pointer; }
+  html, body { overscroll-behavior: none; overflow-x: hidden; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* TOP NAV */
+  .top-bar {
+    background: var(--deep);
+    padding: 16px 24px 18px;
+    padding-top: max(16px, env(safe-area-inset-top, 16px));
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .app-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--cream);
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+  }
+  .app-title span { color: var(--gold); }
+  .app-subtitle { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; }
+  .top-bar-right { display: flex; gap: 10px; align-items: center; }
+  .year-badge {
+    background: var(--plum);
+    color: var(--cream);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .add-btn {
+    background: var(--gold);
+    color: var(--deep);
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 300;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.15s;
+  }
+  .add-btn:active { transform: scale(0.92); }
+  .backup-btn { background: rgba(255,255,255,0.12); color: var(--cream); border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; -webkit-appearance: none; transition: background 0.15s; }
+  .backup-btn:active { background: rgba(255,255,255,0.22); }
+
+  /* STATS STRIP */
+  .stats-strip {
+    background: var(--plum);
+    padding: 12px 24px;
+    display: flex;
+    gap: 0;
+    justify-content: space-around;
+  }
+  .stat-item { text-align: center; flex: 1; }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--cream);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 9px;
+    color: var(--blush);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .stat-divider { width: 1px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--cream);
+    padding: 14px 16px 0;
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 13px 9px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    color: var(--muted);
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: all 0.2s;
+    background: transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tab.active {
+    color: var(--deep);
+    background: var(--card);
+    border-color: var(--border);
+    border-bottom-color: var(--card);
+    margin-bottom: -1px;
+  }
+
+  /* SECTIONS */
+  .section { padding: 18px 16px; display: none; }
+  .section.active { display: block; }
+
+  /* BOOK GRID */
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .book-card {
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(61,43,53,0.08);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .book-card:active { transform: scale(0.97); }
+  .book-cover-wrap {
+    width: 100%;
+    aspect-ratio: 2/3;
+    position: relative;
+    overflow: hidden;
+  }
+  .book-cover-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .book-cover-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    line-height: 1.3;
+  }
+  .cover-emoji { font-size: 28px; margin-bottom: 6px; }
+  .rating-badge {
+    position: absolute;
+    top: 6px; right: 6px;
+    background: rgba(61,43,53,0.75);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+  }
+  .spicy-badge {
+    position: absolute;
+    top: 6px; left: 6px;
+    background: rgba(224,92,92,0.85);
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+  }
+  .book-info { padding: 7px 8px 9px; }
+  .book-title-card {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--deep);
+    line-height: 1.3;
+    margin-bottom: 1px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .book-author-card { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+  .stars-small { font-size: 10px; letter-spacing: -1px; color: var(--gold); }
+  .stars-small .empty { color: #DDD; }
+  .reading-now-pill {
+    font-size: 9px;
+    background: linear-gradient(90deg, var(--plum), var(--rose));
+    color: white;
+    padding: 3px 7px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 3px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    animation: pulse-reading 2s ease-in-out infinite;
+  }
+  @keyframes pulse-reading {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .trope-pill-small {
+    font-size: 9px;
+    background: var(--blush);
+    color: var(--plum);
+    padding: 2px 6px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 3px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* FILTER ROW */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 0 12px;
+    scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .filter-chip.active { background: var(--plum); border-color: var(--plum); color: white; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 48px 32px; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; color: var(--deep); margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; line-height: 1.6; }
+
+  /* ---- BOOKSHELF ---- */
+  .shelf-container { padding: 0; }
+  .shelf-row {
+    position: relative;
+    margin-bottom: 0;
+    padding: 0 0 18px;
+  }
+  .shelf-books {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    padding: 16px 16px 0;
+    min-height: 130px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .shelf-books::-webkit-scrollbar { display: none; }
+  .shelf-plank {
+    height: 18px;
+    background: linear-gradient(180deg, #8B6347 0%, #6B4226 40%, #5C3517 100%);
+    border-radius: 0 0 4px 4px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(61,43,53,0.25);
+    margin: 0 8px;
+  }
+  .shelf-plank::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px 4px 0 0;
+  }
+  .shelf-plank::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 0 0 4px 4px;
+  }
+  .shelf-book-spine {
+    flex-shrink: 0;
+    width: 32px;
+    border-radius: 3px 0 0 3px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 6px;
+  }
+  .shelf-book-spine:active { transform: translateY(-8px) scale(1.05); }
+  .shelf-book-spine:hover { transform: translateY(-6px); }
+  .shelf-spine-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    line-height: 1;
+    max-height: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    padding: 0 2px;
+  }
+  .shelf-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px 4px;
+  }
+  .shelf-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--deep);
+    padding: 16px 16px 8px;
+  }
+  .wall-bg {
+    background: linear-gradient(180deg, #F5EDE4 0%, #EDE0D0 100%);
+    border-radius: 16px;
+    margin: 0 0 20px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 8px rgba(61,43,53,0.06);
+  }
+
+  /* WRAPPED */
+  .wrapped-hero {
+    background: linear-gradient(135deg, var(--deep) 0%, var(--plum) 100%);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .wrapped-hero::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(201,169,110,0.1);
+    top: -80px; right: -60px;
+  }
+  .wrapped-year { font-family: 'Cormorant Garamond', serif; font-size: 60px; font-weight: 600; color: var(--gold); line-height: 1; opacity: 0.3; position: absolute; top: 12px; right: 20px; }
+  .wrapped-headline { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic; color: var(--blush); letter-spacing: 0.5px; margin-bottom: 6px; }
+  .wrapped-count { font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 600; color: white; line-height: 1; }
+  .wrapped-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(61,43,53,0.06); }
+  .stat-card-icon { font-size: 22px; margin-bottom: 8px; }
+  .stat-card-val { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--deep); line-height: 1; }
+  .stat-card-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .trope-chart { background: white; border-radius: 16px; padding: 18px; box-shadow: 0 2px 8px rgba(61,43,53,0.06); }
+  .trope-chart-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--deep); margin-bottom: 14px; }
+  .trope-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .trope-bar-label { font-size: 11px; width: 110px; flex-shrink: 0; color: var(--text); }
+  .trope-bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .trope-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--plum), var(--rose)); transition: width 0.6s ease; }
+  .trope-bar-count { font-size: 11px; font-weight: 600; color: var(--muted); width: 16px; text-align: right; }
+
+  /* COUPLES */
+  .couple-type-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .couple-tab { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: white; color: var(--muted); cursor: pointer; transition: all 0.15s; font-weight: 500; }
+  .couple-tab.active { background: var(--rose); border-color: var(--rose); color: white; }
+  .couple-book-item { background: white; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(61,43,53,0.06); cursor: pointer; transition: transform 0.1s; }
+  .couple-book-item:active { transform: scale(0.98); }
+  .couple-thumb { width: 44px; height: 66px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--blush); display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
+  .couple-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+  .couple-book-info { flex: 1; min-width: 0; }
+  .couple-book-names { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--deep); }
+  .couple-book-title { font-size: 12px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .couple-book-rating { font-size: 13px; color: var(--gold); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(30,15,25,0.6);
+    z-index: 500;
+    backdrop-filter: blur(4px);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--cream);
+    border-radius: 24px 24px 0 0;
+    padding: 0 0 40px;
+    width: 100%;
+    max-width: 430px;
+    max-height: 94vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle { width: 36px; height: 4px; background: rgba(61,43,53,0.15); border-radius: 2px; margin: 12px auto 4px; }
+  .modal-header { padding: 14px 24px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; color: var(--deep); }
+  .modal-close { width: 32px; height: 32px; border-radius: 50%; background: var(--border); border: none; font-size: 18px; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .modal-body { padding: 18px 24px; }
+  .field-group { margin-bottom: 16px; }
+  .field-label { font-size: 11px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
+  .field-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; background: white; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .field-input:focus { border-color: var(--rose); }
+  .field-select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; background: white; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239B7E8A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .thumb-btn { flex:1; max-width:90px; background:white; border:1.5px solid var(--border); border-radius:14px; padding:10px 8px; text-align:center; cursor:pointer; transition:all 0.15s; color:var(--text); }
+  .thumb-btn.active { border-color:var(--plum); background:rgba(107,58,79,0.07); }
+  .thumb-btn:active { transform:scale(0.95); }
+  .format-btn { flex: 1; padding: 12px 8px; border: 1.5px solid var(--border); border-radius: 14px; background: white; text-align: center; cursor: pointer; transition: all 0.15s; color: var(--text); }
+  .format-btn.active { border-color: var(--plum); background: rgba(107,58,79,0.07); }
+  .format-btn:active { transform: scale(0.96); }
+  
+  /* STAR RATING */
+  .star-rating-input { display: flex; gap: 4px; }
+  .star-btn { font-size: 24px; background: none; border: none; cursor: pointer; opacity: 0.2; transition: opacity 0.15s, transform 0.1s; color: var(--gold); padding: 4px; }
+  .star-btn.lit { opacity: 1; }
+  .star-btn:active { transform: scale(0.88); }
+
+  /* SPICY RATING */
+  .spicy-rating-input { display: flex; gap: 4px; }
+  .chili-btn { font-size: 24px; background: none; border: none; cursor: pointer; opacity: 0.2; transition: opacity 0.15s, transform 0.1s; padding: 4px; }
+  .extra-btn { font-size: 24px; background: none; border: none; cursor: pointer; opacity: 0.2; transition: opacity 0.15s, transform 0.1s; padding: 4px; }
+  .extra-btn.lit { opacity: 1; transform: scale(1.1); }
+  .chili-btn.lit { opacity: 1; }
+  .chili-btn:active { transform: scale(0.88); }
+  .spicy-label-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .spicy-desc { font-size: 11px; color: var(--muted); font-style: italic; }
+
+  /* COVER UPLOAD */
+  .cover-upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover-upload-area:active { background: rgba(201,123,132,0.05); border-color: var(--rose); }
+  .cover-upload-preview {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 10px;
+    display: none;
+    margin-bottom: 8px;
+  }
+  .cover-upload-icon { font-size: 32px; margin-bottom: 6px; }
+  .cover-upload-text { font-size: 13px; color: var(--muted); }
+  .cover-upload-sub { font-size: 11px; color: var(--blush); margin-top: 2px; }
+  #coverFileInput { display: none; }
+  .cover-change-btn { font-size: 12px; color: var(--rose); font-weight: 500; margin-top: 6px; cursor: pointer; display: none; }
+
+  .trope-grid-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+  .trope-option { font-size: 12px; padding: 7px 13px; border-radius: 20px; border: 1.5px solid var(--border); background: white; color: var(--text); cursor: pointer; transition: all 0.15s; }
+  .trope-option.selected { background: var(--plum); border-color: var(--plum); color: white; font-weight: 500; }
+
+  .save-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--plum), var(--rose)); color: white; border: none; border-radius: 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.3px; }
+  .save-btn:active { opacity: 0.9; transform: scale(0.99); }
+
+  /* DETAIL MODAL */
+
+  .detail-top-bar {
+    background: var(--deep);
+    padding: 14px 20px 14px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
+  }
+  .detail-back-btn {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+  }
+  .detail-back-btn:active { background: rgba(255,255,255,0.22); }
+  .book-detail-cover { width: 100%; background: var(--deep); padding: 20px 0 0; display: flex; align-items: center; justify-content: center; position: relative; }
+  .book-detail-cover img { width: 120px; height: 180px; object-fit: cover; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: block; }
+  .book-detail-cover-placeholder { width: 120px; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 64px; background: linear-gradient(135deg, var(--blush), var(--rose)); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .detail-body { padding: 20px 24px 36px; }
+  .detail-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--deep); line-height: 1.2; margin-bottom: 4px; }
+  .detail-author { font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+  .detail-dates { font-size: 12px; color: var(--sage); margin-bottom: 12px; }
+  .detail-ratings-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .detail-stars { font-size: 20px; color: var(--gold); letter-spacing: 1px; }
+  .detail-stars .empty { color: #DDD; }
+  .detail-spicy { font-size: 18px; letter-spacing: 1px; }
+  .detail-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .detail-pill { font-size: 12px; padding: 6px 14px; border-radius: 20px; font-weight: 500; }
+  .pill-trope { background: var(--blush); color: var(--plum); }
+  .pill-couple { background: #FCE4EC; color: #880E4F; }
+  .pill-genre { background: #E8F5E9; color: #1B5E20; }
+  .detail-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .couple-display { background: white; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); margin-bottom: 14px; }
+  .couple-heart { font-size: 20px; }
+  .couple-names { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic; color: var(--deep); }
+  .delete-btn { width: 100%; padding: 14px; background: transparent; color: #C62828; border: 1.5px solid #FFCDD2; border-radius: 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+  .delete-btn:active { background: #FFEBEE; }
+
+  .bottom-safe { height: 24px; }
+  .edit-btn { flex:1; padding:13px; background:var(--plum); color:white; border:none; border-radius:14px; font-family:"DM Sans",sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:opacity 0.15s; }
+  .edit-btn:active { opacity:0.85; }
+  .reread-btn { flex:1; padding:13px; background:white; color:var(--plum); border:1.5px solid var(--plum); border-radius:14px; font-family:"DM Sans",sans-serif; font-size:14px; font-weight:500; cursor:pointer; }
+  .reread-entry { background:white; border-radius:14px; padding:12px 14px; margin-bottom:8px; border:1px solid var(--border); }
+  .reread-num { font-size:10px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+  .reread-dates { font-size:12px; color:var(--sage); margin-bottom:4px; }
+  .reread-ratings { display:flex; gap:12px; font-size:13px; }
+
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="app-title"><span>Quena's</span> Library</div>
+    <div class="app-subtitle">My reading world</div>
+  </div>
+  <div class="top-bar-right">
+    <button class="backup-btn" id="backupBtn" title="Backup & Restore">💾</button>
+    <button class="add-btn" id="addBookBtn">＋</button>
+  </div>
+</div>
+
+<div class="stats-strip">
+  <div class="stat-item">
+    <div class="stat-num" id="statsTotal">0</div>
+    <div class="stat-label">📚 Books</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-num" id="statsFanfics">0</div>
+    <div class="stat-label">✍️ Fanfics</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-num" id="statsAvg">—</div>
+    <div class="stat-label">Avg Rating</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-num" id="statsSpicy">—</div>
+    <div class="stat-label">Avg Spice</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('library')">📚 Library</div>
+  <div class="tab" onclick="switchTab('shelf')">🪵 Shelf</div>
+  <div class="tab" onclick="switchTab('couples')">💕 Couples</div>
+  <div class="tab" onclick="switchTab('wrapped')">✨ Wrapped</div>
+</div>
+
+<!-- LIBRARY TAB -->
+<div class="section active" id="tab-library">
+  <div class="filter-row" id="filterRow">
+    <div class="filter-chip active" onclick="filterBooks('all', this)">All</div>
+    <div class="filter-chip" onclick="filterBooks('5', this)">⭐ 5 Stars</div>
+    <div class="filter-chip" onclick="filterBooks('spicy5', this)">🔥🔥🔥 Max Spice</div>
+    <div class="filter-chip" onclick="filterBooks('4', this)">4+ Stars</div>
+    <div class="filter-chip" onclick="filterBooks('enemies', this)">Enemies to Lovers</div>
+    <div class="filter-chip" onclick="filterBooks('second-chance', this)">Second Chance</div>
+    <div class="filter-chip" onclick="filterBooks('fake', this)">Fake Dating</div>
+    <div class="filter-chip" onclick="filterBooks('friends', this)">Friends to Lovers</div>
+    <div class="filter-chip" onclick="filterBooks('forced', this)">Forced Proximity</div>
+    <div class="filter-chip" onclick="filterBooks('grumpy', this)">Grumpy × Sunshine</div>
+  </div>
+  <div class="book-grid" id="bookGrid"></div>
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">📚</div>
+    <div class="empty-title">Your shelf awaits</div>
+    <div class="empty-sub">Tap <strong>+</strong> to log your first book of the year.</div>
+  </div>
+  <div class="bottom-safe"></div>
+</div>
+
+<!-- SHELF TAB -->
+<div class="section" id="tab-shelf">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--deep)">My Bookshelf</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="changeShelfYear(-1)" style="background:var(--border);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation">‹</button>
+      <div id="shelfYear" style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--deep);min-width:44px;text-align:center">2026</div>
+      <button onclick="changeShelfYear(1)" style="background:var(--border);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation">›</button>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:-10px;margin-bottom:12px">tap a spine to peek</div>
+  <div id="shelfContent"></div>
+  <div class="empty-state" id="emptyShelf" style="display:none">
+    <div class="empty-icon">🪵</div>
+    <div class="empty-title">Empty shelves</div>
+    <div class="empty-sub">Your books will appear here as beautiful spines once you log them.</div>
+  </div>
+  <div class="bottom-safe"></div>
+</div>
+
+<!-- COUPLES TAB -->
+<div class="section" id="tab-couples">
+  <div class="couple-type-tabs">
+    <div class="couple-tab active" onclick="filterCouples('all', this)">All 💕</div>
+    <div class="couple-tab" onclick="filterCouples('mm', this)">M/M</div>
+    <div class="couple-tab" onclick="filterCouples('ff', this)">F/F</div>
+    <div class="couple-tab" onclick="filterCouples('mf', this)">M/F</div>
+    <div class="couple-tab" onclick="filterCouples('other', this)">Other</div>
+  </div>
+  <div id="couplesList"></div>
+  <div class="empty-state" id="emptyCouples" style="display:none">
+    <div class="empty-icon">💕</div>
+    <div class="empty-title">No couples yet</div>
+    <div class="empty-sub">Add books with couple names to see them here.</div>
+  </div>
+  <div class="bottom-safe"></div>
+</div>
+
+<!-- WRAPPED TAB -->
+<div class="section" id="tab-wrapped">
+
+  <!-- Year selector -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--deep)">Reading Stats</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="changeYear(-1)" style="background:var(--border);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">‹</button>
+      <div id="wrappedYear" style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--deep);min-width:44px;text-align:center">2026</div>
+      <button onclick="changeYear(1)" style="background:var(--border);border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">›</button>
+    </div>
+  </div>
+
+  <div class="wrapped-hero">
+    <div style="position:absolute;top:12px;right:16px;font-family:'Cormorant Garamond',serif;font-size:50px;font-weight:600;color:var(--gold);opacity:0.2;line-height:1" id="wrappedYearBig">2026</div>
+    <div class="wrapped-headline">Quena's reading year</div>
+    <div style="display:flex;align-items:flex-end;gap:24px;margin-top:4px">
+      <div>
+        <div class="wrapped-count" id="wrappedCount">0</div>
+        <div class="wrapped-sub">📚 books</div>
+      </div>
+      <div>
+        <div class="wrapped-count" id="wrappedFanficCount" style="font-size:36px">0</div>
+        <div class="wrapped-sub">✍️ fanfics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reading goal -->
+  <div class="trope-chart" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="trope-chart-title" style="margin-bottom:0">Reading Goal</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input id="goalInput" type="number" min="1" max="999"
+          style="width:56px;padding:5px 8px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;text-align:center;outline:none;color:var(--deep)"
+          placeholder="—" onchange="saveGoal()" />
+        <span style="font-size:12px;color:var(--muted)">books</span>
+      </div>
+    </div>
+    <div id="goalBarWrap" style="display:none">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span id="goalProgressText" style="font-size:12px;color:var(--muted)"></span>
+        <span id="goalPct" style="font-size:12px;font-weight:600;color:var(--plum)"></span>
+      </div>
+      <div style="height:10px;background:var(--border);border-radius:6px;overflow:hidden">
+        <div id="goalBar" style="height:100%;background:linear-gradient(90deg,var(--plum),var(--rose));border-radius:6px;transition:width 0.6s ease;width:0%"></div>
+      </div>
+    </div>
+    <div id="goalEmpty" style="font-size:12px;color:var(--muted);font-style:italic">Set a goal to track your progress!</div>
+  </div>
+
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="stat-card-icon">⭐</div>
+      <div class="stat-card-val" id="wrappedAvg">—</div>
+      <div class="stat-card-label">Avg rating</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-icon">🔥</div>
+      <div class="stat-card-val" id="wrappedSpicy">—</div>
+      <div class="stat-card-label">Avg spice level</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-icon">💕</div>
+      <div class="stat-card-val" id="wrappedCouples">0</div>
+      <div class="stat-card-label">Ships logged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-icon">🎭</div>
+      <div class="stat-card-val" id="wrappedGenres">0</div>
+      <div class="stat-card-label">Genres read</div>
+    </div>
+  </div>
+  <div class="trope-chart" id="tropeChart">
+    <div class="trope-chart-title">Trope Breakdown</div>
+    <div id="tropeChartBars"><div style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0;">Add books to see your trope stats!</div></div>
+  </div>
+  <div class="bottom-safe"></div>
+</div>
+
+<!-- BACKUP MODAL -->
+<div class="modal-overlay" id="backupModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">💾 Backup & Restore</div>
+      <button class="modal-close" onclick="document.getElementById('backupModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Save your books to a file on your phone so you never lose them. You can also restore from a previous backup.</div>
+
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Save Backup</div>
+        <button onclick="exportBooks()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--plum),var(--rose));color:white;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;touch-action:manipulation">📥 Download My Books</button>
+      </div>
+
+      <div>
+        <div style="font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Restore from Backup</div>
+        <div style="border:2px dashed var(--border);border-radius:14px;padding:18px;text-align:center;cursor:pointer" onclick="document.getElementById('restoreFileInput').click()">
+          <div style="font-size:28px;margin-bottom:6px">📂</div>
+          <div style="font-size:13px;color:var(--muted)">Tap to choose backup file</div>
+          <div style="font-size:11px;color:var(--blush);margin-top:2px">.json backup file</div>
+        </div>
+        <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="importBooks(event)" />
+        <div id="restoreMsg" style="font-size:12px;text-align:center;margin-top:10px;min-height:18px"></div>
+      </div>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#FFF8F0;border-radius:12px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">💡 <strong>Tip:</strong> Download a backup before every update, and restore it right after if any books are missing.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BOOK MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="addModalTitle">Log a Book</div>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- COVER UPLOAD -->
+      <div class="field-group">
+        <label class="field-label">Book Cover Photo</label>
+        <div class="cover-upload-area" onclick="document.getElementById('coverFileInput').click()">
+          <img id="coverPreview" class="cover-upload-preview" src="" alt="Cover preview" />
+          <div id="coverUploadPrompt">
+            <div class="cover-upload-icon">🖼️</div>
+            <div class="cover-upload-text">Tap to add cover from gallery</div>
+            <div class="cover-upload-sub">JPG, PNG — your camera roll</div>
+          </div>
+          <div class="cover-change-btn" id="coverChangeBtn">Change photo</div>
+        </div>
+        <input type="file" id="coverFileInput" accept="image/*" onchange="handleCoverUpload(event)" />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Book Title *</label>
+        <input class="field-input" id="inputTitle" placeholder="e.g. The Love Hypothesis" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Author</label>
+        <input class="field-input" id="inputAuthor" placeholder="e.g. Ali Hazelwood" />
+      </div>
+
+      <!-- DATES -->
+      <div class="field-group">
+        <label class="field-label">Reading Dates</label>
+        <div class="date-row">
+          <div>
+            <label class="field-label" style="font-size:10px;margin-bottom:4px">Started</label>
+            <input class="field-input" id="inputDateStart" type="date" style="font-size:13px;padding:10px 12px;" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:10px;margin-bottom:4px">Finished</label>
+            <input class="field-input" id="inputDateEnd" type="date" style="font-size:13px;padding:10px 12px;" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Star Rating</label>
+        <div class="star-rating-input" id="starInput">
+          <button class="star-btn" onclick="setRating(1)">⭐</button>
+          <button class="star-btn" onclick="setRating(2)">⭐</button>
+          <button class="star-btn" onclick="setRating(3)">⭐</button>
+          <button class="star-btn" onclick="setRating(4)">⭐</button>
+          <button class="star-btn" onclick="setRating(5)">⭐</button>
+        </div>
+        <div class="spicy-label-row">
+          <div class="spicy-desc" id="starDesc">Tap to rate the book ⭐</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Spice Level 🔥</label>
+        <div class="spicy-rating-input" id="chiliInput">
+          <button class="chili-btn" onclick="setSpicy(1)">🔥</button>
+          <button class="chili-btn" onclick="setSpicy(2)">🔥</button>
+          <button class="chili-btn" onclick="setSpicy(3)">🔥</button>
+          <button class="chili-btn" onclick="setSpicy(4)">🔥</button>
+          <button class="chili-btn" onclick="setSpicy(5)">🔥</button>
+        </div>
+        <div class="spicy-label-row">
+          <div class="spicy-desc" id="spicyDesc">Tap to rate the heat 🔥</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Tropes (pick all that apply)</label>
+        <div class="trope-grid-picker" id="tropePicker">
+          <div class="trope-option" onclick="toggleTrope(this,'enemies-to-lovers')">Enemies to Lovers</div>
+          <div class="trope-option" onclick="toggleTrope(this,'second-chance')">Second Chance</div>
+          <div class="trope-option" onclick="toggleTrope(this,'fake-dating')">Fake Dating</div>
+          <div class="trope-option" onclick="toggleTrope(this,'friends-to-lovers')">Friends to Lovers</div>
+          <div class="trope-option" onclick="toggleTrope(this,'forced-proximity')">Forced Proximity</div>
+          <div class="trope-option" onclick="toggleTrope(this,'grumpy-sunshine')">Grumpy × Sunshine</div>
+          <div class="trope-option" onclick="toggleTrope(this,'slow-burn')">Slow Burn</div>
+          <div class="trope-option" onclick="toggleTrope(this,'why-choose')">Why Choose</div>
+          <div class="trope-option" onclick="toggleTrope(this,'forbidden')">Forbidden Love</div>
+          <div class="trope-option" onclick="toggleTrope(this,'instalove')">Instalove</div>
+          <div class="trope-option" onclick="toggleTrope(this,'boss-employee')">Boss × Employee</div>
+          <div class="trope-option" onclick="toggleTrope(this,'age-gap')">Age Gap</div>
+          <div class="trope-option" onclick="toggleTrope(this,'single-parent')">Single Parent</div>
+          <div class="trope-option" onclick="toggleTrope(this,'sports-romance')">Sports Romance</div>
+          <div class="trope-option" onclick="toggleTrope(this,'small-town')">Small Town</div>
+          <div class="trope-option" onclick="toggleTrope(this,'vacation-romance')">Vacation Romance</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Couple Type</label>
+        <div class="trope-grid-picker" id="coupleTypePicker">
+          <div class="trope-option" onclick="setCoupleType(this,'mf')">M/F</div>
+          <div class="trope-option" onclick="setCoupleType(this,'mm')">M/M</div>
+          <div class="trope-option" onclick="setCoupleType(this,'ff')">F/F</div>
+          <div class="trope-option" onclick="setCoupleType(this,'other')">Other / Poly</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Couple Names (optional)</label>
+        <input class="field-input" id="inputCouple" placeholder="e.g. Olive & Adam" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Genre</label>
+        <div class="trope-grid-picker" id="genrePicker">
+          <div class="trope-option" onclick="setGenre(this,'Contemporary Romance')">Contemporary Romance</div>
+          <div class="trope-option" onclick="setGenre(this,'Fantasy Romance')">Fantasy Romance</div>
+          <div class="trope-option" onclick="setGenre(this,'Historical Romance')">Historical Romance</div>
+          <div class="trope-option" onclick="setGenre(this,'Paranormal Romance')">Paranormal Romance</div>
+          <div class="trope-option" onclick="setGenre(this,'Dark Romance')">Dark Romance</div>
+          <div class="trope-option" onclick="setGenre(this,'Romantic Suspense')">Romantic Suspense</div>
+          <div class="trope-option" onclick="setGenre(this,'New Adult')">New Adult</div>
+          <div class="trope-option" onclick="setGenre(this,'Sports Romance')">Sports Romance</div>
+          <div class="trope-option" onclick="setGenre(this,'Cozy Fantasy')">Cozy Fantasy</div>
+          <div class="trope-option" onclick="setGenre(this,'General Fiction')">General Fiction</div>
+          <div class="trope-option" onclick="setGenre(this,'Thriller')">Thriller</div>
+          <div class="trope-option" onclick="setGenre(this,'Mystery')">Mystery</div>
+          <div class="trope-option" onclick="setGenre(this,'Sci-Fi')">Sci-Fi</div>
+          <div class="trope-option" onclick="setGenre(this,'Non-Fiction')">Non-Fiction</div>
+          <div class="trope-option" onclick="setGenre(this,'Other')">Other</div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Format</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="format-btn active" onclick="setFormat(this,'physical')" data-format="physical">
+            <div style="font-size:22px">📚</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Physical</div>
+          </div>
+          <div class="format-btn" onclick="setFormat(this,'ebook')" data-format="ebook">
+            <div style="font-size:22px">📱</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">eBook</div>
+          </div>
+          <div class="format-btn" onclick="setFormat(this,'audio')" data-format="audio">
+            <div style="font-size:22px">🎧</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Audiobook</div>
+          </div>
+          <div class="format-btn" onclick="setFormat(this,'fanfic')" data-format="fanfic">
+            <div style="font-size:22px">✍️</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Fanfic</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group" id="fanficLinkGroup" style="display:none">
+        <label class="field-label">Fanfic Link 🔗</label>
+        <input class="field-input" id="inputFanficLink" placeholder="Paste AO3, Wattpad or any URL..." type="url" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Humor Rating 👑</label>
+        <div class="spicy-rating-input" id="humorInput">
+          <button class="extra-btn" onclick="setHumor(1)">👑</button>
+          <button class="extra-btn" onclick="setHumor(2)">👑</button>
+          <button class="extra-btn" onclick="setHumor(3)">👑</button>
+          <button class="extra-btn" onclick="setHumor(4)">👑</button>
+          <button class="extra-btn" onclick="setHumor(5)">👑</button>
+        </div>
+        <div class="spicy-label-row"><div class="spicy-desc" id="humorDesc">How funny was it? 👑</div></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Tear Rating 💧</label>
+        <div class="spicy-rating-input" id="tearInput">
+          <button class="extra-btn" onclick="setTear(1)">💧</button>
+          <button class="extra-btn" onclick="setTear(2)">💧</button>
+          <button class="extra-btn" onclick="setTear(3)">💧</button>
+          <button class="extra-btn" onclick="setTear(4)">💧</button>
+          <button class="extra-btn" onclick="setTear(5)">💧</button>
+        </div>
+        <div class="spicy-label-row"><div class="spicy-desc" id="tearDesc">How emotional was it? 💧</div></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fluff Rating 🩷</label>
+        <div class="spicy-rating-input" id="fluffInput">
+          <button class="extra-btn" onclick="setFluff(1)">🩷</button>
+          <button class="extra-btn" onclick="setFluff(2)">🩷</button>
+          <button class="extra-btn" onclick="setFluff(3)">🩷</button>
+          <button class="extra-btn" onclick="setFluff(4)">🩷</button>
+          <button class="extra-btn" onclick="setFluff(5)">🩷</button>
+        </div>
+        <div class="spicy-label-row"><div class="spicy-desc" id="fluffDesc">How fluffy was it? 🩷</div></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Would you read it again?</label>
+        <div style="display:flex;gap:12px">
+          <div class="thumb-btn" id="thumbUp" onclick="setReadAgain(true)">
+            <div style="font-size:26px">👍</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Yes!</div>
+          </div>
+          <div class="thumb-btn" id="thumbDown" onclick="setReadAgain(false)">
+            <div style="font-size:26px">👎</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">No</div>
+          </div>
+          <div class="thumb-btn" id="thumbMaybe" onclick="setReadAgain(null)">
+            <div style="font-size:26px">🤷</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Maybe</div>
+          </div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Standalone or Series?</label>
+        <div style="display:flex;gap:12px">
+          <div class="thumb-btn" id="btnStandalone" onclick="setSeriesType('standalone')">
+            <div style="font-size:26px">📗</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Standalone</div>
+          </div>
+          <div class="thumb-btn" id="btnSeries" onclick="setSeriesType('series')">
+            <div style="font-size:26px">📚</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Series</div>
+          </div>
+        </div>
+        <input class="field-input" id="inputSeriesName" placeholder="Series name (optional)" style="margin-top:10px;display:none" />
+      </div>
+      <button class="save-btn" id="saveBookBtn" onclick="saveBook()">Save to My Shelf ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="detail-top-bar">
+      <button class="detail-back-btn" onclick="document.getElementById('detailModal').classList.remove('open')">&#8592; Back</button>
+    </div>
+    <div class="book-detail-cover" id="detailCover"></div>
+    <div class="detail-body">
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="detail-author" id="detailAuthor"></div>
+      <div class="detail-dates" id="detailDates"></div>
+      <div id="detailFormat" style="margin-bottom:6px;font-size:13px;color:var(--muted)"></div>
+      <div id="detailFanficLinkWrap" style="display:none;margin-bottom:12px">
+        <a id="detailFanficLink" href="#" target="_blank" style="font-size:13px;color:var(--rose);font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:5px">🔗 Open Fanfic</a>
+      </div>
+      <div class="detail-ratings-row">
+        <div>
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Rating</div>
+          <div class="detail-stars" id="detailStars"></div>
+        </div>
+        <div id="detailSpicyWrap">
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Spice</div>
+          <div class="detail-spicy" id="detailSpicy"></div>
+        </div>
+        <div id="detailHumorWrap" style="display:none">
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Humor</div>
+          <div style="font-size:18px;letter-spacing:1px" id="detailHumor"></div>
+        </div>
+        <div id="detailTearWrap" style="display:none">
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Tears</div>
+          <div style="font-size:18px;letter-spacing:1px" id="detailTear"></div>
+        </div>
+        <div id="detailFluffWrap" style="display:none">
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Fluff</div>
+          <div style="font-size:18px;letter-spacing:1px" id="detailFluff"></div>
+        </div>
+      </div>
+      <div class="detail-section-label">Genre</div>
+      <div class="detail-row" id="detailGenre"></div>
+      <div id="detailCoupleWrap" style="display:none">
+        <div class="detail-section-label">Main Couple</div>
+        <div class="couple-display">
+          <div class="couple-heart">💕</div>
+          <div class="couple-names" id="detailCoupleName"></div>
+        </div>
+      </div>
+      <div class="detail-section-label">Tropes</div>
+      <div class="detail-row" id="detailTropes"></div>
+      <div id="detailReadAgain" style="margin-bottom:12px;display:flex;align-items:center;gap:6px"></div>
+
+      <div id="detailSeriesWrap" style="display:none;margin-bottom:12px">
+        <div class="detail-section-label">Format</div>
+        <div id="detailSeries" style="font-size:14px;color:var(--text)"></div>
+      </div>
+
+      <div id="detailRereadsWrap" style="display:none;margin-top:4px">
+        <div class="detail-section-label">Re-reads &#128257;</div>
+        <div id="detailRereads"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="edit-btn" id="detailEditBtn">&#9999;&#65039; Edit</button>
+        <button class="reread-btn" id="detailRereadBtn">&#128257; Re-read</button>
+      </div>
+      <button class="delete-btn" id="detailDeleteBtn" style="margin-top:10px">Remove from Shelf</button>
+    </div>
+  </div>
+</div>
+
+<!-- RE-READ MODAL -->
+<div class="modal-overlay" id="rereadModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Log a Re-read &#128257;</div>
+      <button class="modal-close" onclick="closeRereadModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="rereadBookTitle" style="font-family:Cormorant Garamond,serif;font-size:18px;font-style:italic;color:var(--plum);margin-bottom:18px;text-align:center"></div>
+      <div class="field-group">
+        <label class="field-label">Reading Dates</label>
+        <div class="date-row">
+          <div>
+            <label class="field-label" style="font-size:10px;margin-bottom:4px">Started</label>
+            <input class="field-input" id="rereadDateStart" type="date" style="font-size:13px;padding:10px 12px;" />
+          </div>
+          <div>
+            <label class="field-label" style="font-size:10px;margin-bottom:4px">Finished</label>
+            <input class="field-input" id="rereadDateEnd" type="date" style="font-size:13px;padding:10px 12px;" />
+          </div>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Star Rating</label>
+        <div class="star-rating-input" id="rereadStarInput">
+          <button class="star-btn" onclick="setRereadRating(1)">&#11088;</button>
+          <button class="star-btn" onclick="setRereadRating(2)">&#11088;</button>
+          <button class="star-btn" onclick="setRereadRating(3)">&#11088;</button>
+          <button class="star-btn" onclick="setRereadRating(4)">&#11088;</button>
+          <button class="star-btn" onclick="setRereadRating(5)">&#11088;</button>
+        </div>
+        <div class="spicy-label-row"><div class="spicy-desc" id="rereadStarDesc">Tap to rate &#11088;</div></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Spice Level &#128293;</label>
+        <div class="spicy-rating-input" id="rereadChiliInput">
+          <button class="chili-btn" onclick="setRereadSpicy(1)">&#128293;</button>
+          <button class="chili-btn" onclick="setRereadSpicy(2)">&#128293;</button>
+          <button class="chili-btn" onclick="setRereadSpicy(3)">&#128293;</button>
+          <button class="chili-btn" onclick="setRereadSpicy(4)">&#128293;</button>
+          <button class="chili-btn" onclick="setRereadSpicy(5)">&#128293;</button>
+        </div>
+        <div class="spicy-label-row"><div class="spicy-desc" id="rereadSpicyDesc">Tap to rate the heat &#128293;</div></div>
+      </div>
+      <button class="save-btn" onclick="saveReread()">Save Re-read &#10024;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TROPES_MAP = {
+  'enemies-to-lovers':'Enemies to Lovers','second-chance':'Second Chance','fake-dating':'Fake Dating',
+  'friends-to-lovers':'Friends to Lovers','forced-proximity':'Forced Proximity','grumpy-sunshine':'Grumpy × Sunshine',
+  'slow-burn':'Slow Burn','why-choose':'Why Choose','forbidden':'Forbidden Love','instalove':'Instalove',
+  'boss-employee':'Boss × Employee','age-gap':'Age Gap','single-parent':'Single Parent',
+  'sports-romance':'Sports Romance','small-town':'Small Town','vacation-romance':'Vacation Romance'
+};
+
+const SPINE_COLORS = [
+  ['#C97B84','#A85F68'],['#6B3A4F','#4D2537'],['#7B9EA8','#5C7F8A'],['#9E8B6B','#7D6A4C'],
+  ['#8A9E8C','#6A7D6C'],['#C9A96E','#A8884D'],['#A07898','#7D5577'],['#7898A0','#557D85'],
+  ['#98A07C','#7D855C'],['#A08070','#7D5F50'],['#8070A0','#604F80'],['#70A080','#4F806A'],
+];
+const BOOK_EMOJIS = ['📖','💕','🌹','✨','🔥','🌙','💫','🦋','🍂','❄️','🌸','🏰','⚔️','💎','🎭'];
+
+const SPICY_LABELS = ['','Sweet (no spice 🩷)','A little warm (kissing scenes 😊)','Getting hot (fade to black 🌡️)','Spicy! (open door 🔥)','Extremely spicy!! (very explicit 🔥🔥)'];
+const STAR_LABELS = ['','Didn\'t enjoy it 😔','It was okay 😐','Liked it! 😊','Really loved it 🥰','Absolutely obsessed!! 🤩'];
+const HUMOR_LABELS = ['','Barely a smile 😐','A few chuckles 😄','Genuinely funny 😂','Had me laughing out loud 🤣','Couldn\'t stop laughing 👑'];
+const FLUFF_LABELS = ['','Just a hint 🩷','Warm and sweet 🩷','Very fluffy 🩷','Tooth-rottingly cute 🩷','Pure fluff overload 🩷🩷'];
+const TEAR_LABELS = ['','A little sad 😕','Got a bit teary 😢','Cried a little 😭','Full on crying 💧','Absolutely destroyed me 💔'];
+
+let books = [];
+let currentRating = 0;
+let currentSpicy = 0;
+let selectedTropes = [];
+let currentFilter = 'all';
+let currentCoupleFilter = 'all';
+let currentCoverDataURL = null;
+let currentFormat = 'physical';
+let editingIdx = -1;
+let currentHumor = 0;
+let currentTear = 0;
+let currentReadAgain = undefined;
+let currentSeriesType = null;
+let currentFluff = 0;
+let currentCoupleType = 'mf';
+let currentGenre = '';
+
+async function loadBooks() {
+  try {
+    const val = localStorage.getItem('quena-books-v2');
+    if (val) {
+      books = JSON.parse(val);
+    } else {
+      // Try the auto-backup copy if main key is missing
+      const bak = localStorage.getItem('quena-books-autobak');
+      if (bak) {
+        const parsed = JSON.parse(bak);
+        books = parsed.books || parsed;
+        // Restore to main key
+        localStorage.setItem('quena-books-v2', JSON.stringify(books));
+      }
+    }
+  } catch(e) { books = []; }
+  renderAll();
+}
+
+async function saveBooks() {
+  try { localStorage.setItem('quena-books-v2', JSON.stringify(books)); } catch(e) {}
+  // Also keep an auto-backup in localStorage as a second copy
+  try { localStorage.setItem('quena-books-autobak', JSON.stringify({books, savedAt: new Date().toISOString()})); } catch(e) {}
+}
+
+function autoBackupToFile() {
+  // Silently save a backup JSON to the device — user just taps "Save" in the share sheet
+  try {
+    const data = { books, exportedAt: new Date().toISOString(), version: 'quena-books-v2' };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quenas-library-backup.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) {}
+}
+
+function renderAll() {
+  renderBooks();
+  renderShelf();
+  renderCouples();
+  renderWrapped();
+  updateStats();
+}
+
+function updateStats() {
+  const yr = new Date().getFullYear();
+  // split fanfics vs books (for current year display in badge)
+  const booksOnly = books.filter(b=>b.format!=='fanfic');
+  const fanfics = books.filter(b=>b.format==='fanfic');
+  document.getElementById('statsTotal').textContent = booksOnly.length;
+  document.getElementById('statsFanfics').textContent = fanfics.length;
+
+  const total = books.length;
+  if (total === 0) {
+    document.getElementById('statsAvg').textContent = '—';
+    document.getElementById('statsSpicy').textContent = '—';
+    return;
+  }
+  const rated = books.filter(b=>b.rating>0);
+  const avg = rated.length ? (rated.reduce((a,b)=>a+b.rating,0)/rated.length).toFixed(1) : '—';
+  document.getElementById('statsAvg').textContent = avg !== '—' ? '⭐'+avg : '—';
+
+  const spiced = books.filter(b=>b.spicy>0);
+  const avgSpicy = spiced.length ? (spiced.reduce((a,b)=>a+b.spicy,0)/spiced.length).toFixed(1) : '—';
+  document.getElementById('statsSpicy').textContent = avgSpicy !== '—' ? avgSpicy+'🔥' : '—';
+}
+
+function getBookGradient(idx) {
+  const c = SPINE_COLORS[idx % SPINE_COLORS.length];
+  return `linear-gradient(135deg,${c[0]},${c[1]})`;
+}
+
+function renderStars(rating) {
+  let h=''; for(let i=1;i<=5;i++) h+=`<span class="${i<=rating?'':'empty'}">★</span>`; return h;
+}
+function renderChilis(spicy) {
+  if (!spicy) return '<span style="color:var(--muted);font-size:12px">Not rated</span>';
+  let h=''; for(let i=1;i<=5;i++) h+=`<span style="opacity:${i<=spicy?1:0.2}">🔥</span>`; return h;
+}
+
+function renderBooks() {
+  const grid = document.getElementById('bookGrid');
+  const empty = document.getElementById('emptyState');
+  let filtered = books;
+  if (currentFilter==='5') filtered=books.filter(b=>b.rating===5);
+  else if (currentFilter==='4') filtered=books.filter(b=>b.rating>=4);
+  else if (currentFilter==='spicy5') filtered=books.filter(b=>b.spicy===5);
+  else if (currentFilter!=='all') {
+    const map={'enemies':'enemies-to-lovers','second-chance':'second-chance','fake':'fake-dating','friends':'friends-to-lovers','forced':'forced-proximity','grumpy':'grumpy-sunshine'};
+    const key=map[currentFilter]||currentFilter;
+    filtered=books.filter(b=>(b.tropes||[]).includes(key));
+  }
+
+  // Sort by start date oldest to newest; books with no date go to end
+  filtered = [...filtered].sort((a,b)=>{
+    const da = a.dateStart || a.dateEnd || a.added || '';
+    const db = b.dateStart || b.dateEnd || b.added || '';
+    if (!da && !db) return 0;
+    if (!da) return 1;
+    if (!db) return -1;
+    return da > db ? -1 : da < db ? 1 : 0;
+  });
+
+  if (filtered.length===0) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+
+  grid.innerHTML=filtered.map((b)=>{
+    const realIdx=books.indexOf(b);
+    const trope=b.tropes&&b.tropes[0]?TROPES_MAP[b.tropes[0]]:'';
+    const emoji=b.emoji||'📖';
+    const coverHTML=b.coverImage
+      ?`<img class="book-cover-img" src="${b.coverImage}" alt="${b.title}" />`
+      :`<div class="book-cover-placeholder" style="background:${getBookGradient(realIdx)}"><div class="cover-emoji">${emoji}</div><div style="font-size:10px;color:rgba(255,255,255,0.9);line-height:1.3;padding:0 4px">${b.title}</div></div>`;
+    const isReading = b.dateStart && !b.dateEnd;
+    const spicyBadge = !isReading && b.spicy ? `<div class="spicy-badge">${'🔥'.repeat(b.spicy)}</div>` : '';
+    const ratingBadge = !isReading && b.rating ? `<div class="rating-badge">${b.rating}★</div>` : '';
+    const bottomInfo = isReading
+      ? `<div class="reading-now-pill">📖 currently reading</div>`
+      : `<div class="stars-small">${renderStars(b.rating)}</div>${trope?`<div class="trope-pill-small">${trope}</div>`:''}`;
+    return `
+    <div class="book-card" onclick="openDetail(${realIdx})">
+      <div class="book-cover-wrap">${coverHTML}${ratingBadge}${spicyBadge}</div>
+      <div class="book-info">
+        <div class="book-title-card">${b.title}</div>
+        <div class="book-author-card">${b.author||''}</div>
+        ${bottomInfo}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Extract dominant color from a cover image using canvas
+function getSpineColors(b, fallbackIdx) {
+  const fallback = SPINE_COLORS[fallbackIdx % SPINE_COLORS.length];
+  if (!b.coverImage) return Promise.resolve(fallback);
+  return new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 10; canvas.height = 10;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 10, 10);
+        const data = ctx.getImageData(0, 0, 10, 10).data;
+        let r=0, g=0, b=0, count=0;
+        for(let i=0; i<data.length; i+=4) {
+          r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++;
+        }
+        r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count);
+        // darken by 20% for gradient bottom
+        const dr=Math.round(r*0.75), dg=Math.round(g*0.75), db=Math.round(b*0.75);
+        resolve([`rgb(${r},${g},${b})`, `rgb(${dr},${dg},${db})`]);
+      } catch(e) { resolve(fallback); }
+    };
+    img.onerror = () => resolve(fallback);
+    img.src = b.coverImage;
+  });
+}
+
+let shelfYear = new Date().getFullYear();
+
+function changeShelfYear(dir) {
+  shelfYear += dir;
+  document.getElementById('shelfYear').textContent = shelfYear;
+  renderShelf();
+}
+
+function renderShelf() {
+  const el=document.getElementById('shelfContent');
+  const empty=document.getElementById('emptyShelf');
+
+  // Filter by selected year, sort newest to oldest
+  let yearBooks = books.filter(b => {
+    const d = b.dateEnd || b.dateStart || b.added;
+    return d && new Date(d).getFullYear() === shelfYear;
+  });
+
+  yearBooks = yearBooks.slice().sort((a,b)=>{
+    const da = a.dateStart || a.dateEnd || a.added || '';
+    const db = b.dateStart || b.dateEnd || b.added || '';
+    return da > db ? -1 : da < db ? 1 : 0;
+  });
+
+  if(yearBooks.length===0){
+    el.innerHTML='';
+    empty.style.display='block';
+    empty.querySelector('.empty-title').textContent='No books for '+shelfYear;
+    empty.querySelector('.empty-sub').textContent='Add books with dates to see them here.';
+    return;
+  }
+  empty.style.display='none';
+
+  const chunkSize=8;
+  const rows=[];
+  for(let i=0;i<yearBooks.length;i+=chunkSize) rows.push(yearBooks.slice(i,i+chunkSize));
+
+  // First render with fallback colors, then update with extracted colors
+  el.innerHTML=rows.map((row,ri)=>{
+    const spines=row.map((b)=>{
+      const realIdx=books.indexOf(b);
+      const colors=SPINE_COLORS[realIdx%SPINE_COLORS.length];
+      const height=100+Math.abs((realIdx*17+31)%45);
+      return `<div class="shelf-book-spine" id="spine-${realIdx}" style="background:linear-gradient(180deg,${colors[0]},${colors[1]});height:${height}px;" onclick="openDetail(${realIdx})" title="${b.title}">
+        <div class="shelf-spine-title">${b.title}</div>
+      </div>`;
+    }).join('');
+    return `<div class="wall-bg">
+      <div class="shelf-label">Shelf ${ri+1}</div>
+      <div class="shelf-books">${spines}</div>
+      <div class="shelf-plank"></div>
+    </div>`;
+  }).join('');
+
+  // Async update spine colors from cover images
+  yearBooks.forEach((b, i) => {
+    const realIdx = books.indexOf(b);
+    if (!b.coverImage) return;
+    getSpineColors(b, realIdx).then(colors => {
+      const el2 = document.getElementById('spine-'+realIdx);
+      if (el2) el2.style.background = `linear-gradient(180deg,${colors[0]},${colors[1]})`;
+    });
+  });
+}
+
+function renderCouples() {
+  const list=document.getElementById('couplesList');
+  const empty=document.getElementById('emptyCouples');
+  let filtered=books.filter(b=>b.couple&&b.couple.trim());
+  if(currentCoupleFilter!=='all') filtered=filtered.filter(b=>b.coupleType===currentCoupleFilter);
+  if(filtered.length===0){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+
+  // Deduplicate by couple name — keep the most recently read entry
+  const seen = {};
+  filtered.forEach(b => {
+    const key = b.couple.trim().toLowerCase();
+    if(!seen[key]) {
+      seen[key] = b;
+    } else {
+      // Keep whichever has a more recent date
+      const existing = seen[key];
+      const da = b.dateEnd || b.dateStart || b.added || '';
+      const db = existing.dateEnd || existing.dateStart || existing.added || '';
+      if(da > db) seen[key] = b;
+    }
+  });
+  const deduped = Object.values(seen);
+
+  list.innerHTML=deduped.map((b)=>{
+    const realIdx=books.indexOf(b);
+    const emoji=b.emoji||'📖';
+    const thumbHTML=b.coverImage
+      ?`<div class="couple-thumb"><img src="${b.coverImage}" alt="" /></div>`
+      :`<div class="couple-thumb" style="background:${getBookGradient(realIdx)}">${emoji}</div>`;
+    return `
+    <div class="couple-book-item" onclick="openDetail(${realIdx})">
+      ${thumbHTML}
+      <div class="couple-book-info">
+        <div class="couple-book-names">${b.couple}</div>
+        <div class="couple-book-title">${b.title}${b.author?' — '+b.author:''}</div>
+        <div style="font-size:11px;margin-top:2px">${b.spicy?'🔥'.repeat(b.spicy):''}</div>
+      </div>
+      <div class="couple-book-rating">${b.rating?b.rating+'★':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// Year navigation for wrapped tab
+let wrappedYear = new Date().getFullYear();
+
+function changeYear(dir) {
+  wrappedYear += dir;
+  renderWrapped();
+}
+
+function saveGoal() {
+  const val = parseInt(document.getElementById('goalInput').value) || 0;
+  try { localStorage.setItem('quena-goal-'+wrappedYear, val||''); } catch(e) {}
+  renderWrapped();
+}
+
+function loadGoal(yr) {
+  try { return parseInt(localStorage.getItem('quena-goal-'+yr))||0; } catch(e) { return 0; }
+}
+
+function renderWrapped() {
+  document.getElementById('wrappedYear').textContent = wrappedYear;
+  document.getElementById('wrappedYearBig').textContent = wrappedYear;
+
+  // Filter books for selected year
+  const yearBooks = books.filter(b => {
+    const d = b.dateEnd || b.dateStart || b.added;
+    return d && new Date(d).getFullYear() === wrappedYear;
+  });
+
+  const booksOnly = yearBooks.filter(b=>b.format!=='fanfic');
+  const fanfics = yearBooks.filter(b=>b.format==='fanfic');
+
+  document.getElementById('wrappedCount').textContent = booksOnly.length;
+  document.getElementById('wrappedFanficCount').textContent = fanfics.length;
+
+  const rated=yearBooks.filter(b=>b.rating>0);
+  const avg=rated.length?(rated.reduce((a,b)=>a+b.rating,0)/rated.length).toFixed(1):'—';
+  document.getElementById('wrappedAvg').textContent=avg!=='—'?'⭐'+avg:'—';
+
+  const spiced=yearBooks.filter(b=>b.spicy>0);
+  const avgSpicy=spiced.length?(spiced.reduce((a,b)=>a+b.spicy,0)/spiced.length).toFixed(1):'—';
+  document.getElementById('wrappedSpicy').textContent=avgSpicy!=='—'?avgSpicy+'🔥':'—';
+
+  document.getElementById('wrappedCouples').textContent=yearBooks.filter(b=>b.couple&&b.couple.trim()).length;
+  const genres=new Set(yearBooks.map(b=>b.genre).filter(Boolean));
+  document.getElementById('wrappedGenres').textContent=genres.size;
+
+  // Goal
+  const goal = loadGoal(wrappedYear);
+  const goalInput = document.getElementById('goalInput');
+  goalInput.value = goal || '';
+  const totalRead = booksOnly.length;
+  if (goal > 0) {
+    document.getElementById('goalBarWrap').style.display='block';
+    document.getElementById('goalEmpty').style.display='none';
+    const pct = Math.min(Math.round(totalRead/goal*100), 100);
+    document.getElementById('goalBar').style.width = pct+'%';
+    document.getElementById('goalPct').textContent = pct+'%';
+    document.getElementById('goalProgressText').textContent = totalRead+' of '+goal+' books';
+  } else {
+    document.getElementById('goalBarWrap').style.display='none';
+    document.getElementById('goalEmpty').style.display='block';
+  }
+
+  // Tropes for selected year
+  const tCounts={};
+  yearBooks.forEach(b=>(b.tropes||[]).forEach(t=>tCounts[t]=(tCounts[t]||0)+1));
+  const sorted=Object.entries(tCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max=sorted.length?sorted[0][1]:1;
+  const barsEl=document.getElementById('tropeChartBars');
+  if(!sorted.length){barsEl.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0;">No data for '+wrappedYear+' yet!</div>';return;}
+  barsEl.innerHTML=sorted.map(([k,v])=>`
+    <div class="trope-bar-row">
+      <div class="trope-bar-label">${TROPES_MAP[k]||k}</div>
+      <div class="trope-bar-track"><div class="trope-bar-fill" style="width:${Math.round(v/max*100)}%"></div></div>
+      <div class="trope-bar-count">${v}</div>
+    </div>`).join('');
+}
+
+function switchTab(name) {
+  const names=['library','shelf','couples','wrapped'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+function filterBooks(key,el) {
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); currentFilter=key; renderBooks();
+}
+function filterCouples(key,el) {
+  document.querySelectorAll('.couple-tab').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); currentCoupleFilter=key; renderCouples();
+}
+
+// ADD MODAL
+function openAddModal() {
+  editingIdx=-1;
+  document.getElementById('addModalTitle').textContent='Log a Book';
+  document.getElementById('saveBookBtn').textContent='Save to My Shelf ✨';
+
+  // Text fields
+  document.getElementById('inputTitle').value='';
+  document.getElementById('inputAuthor').value='';
+  document.getElementById('inputCouple').value='';
+  document.getElementById('inputDateStart').value='';
+  document.getElementById('inputDateEnd').value='';
+  document.getElementById('inputSeriesName').value='';
+  document.getElementById('inputFanficLink').value='';
+
+  // Ratings
+  currentRating=0; currentSpicy=0;
+  currentHumor=0; currentTear=0; currentFluff=0;
+  document.querySelectorAll('.star-btn').forEach(s=>s.classList.remove('lit'));
+  document.querySelectorAll('.chili-btn').forEach(c=>c.classList.remove('lit'));
+  document.querySelectorAll('#humorInput .extra-btn').forEach(b=>b.classList.remove('lit'));
+  document.querySelectorAll('#tearInput .extra-btn').forEach(b=>b.classList.remove('lit'));
+  document.querySelectorAll('#fluffInput .extra-btn').forEach(b=>b.classList.remove('lit'));
+  document.getElementById('starDesc').textContent='Tap to rate the book ⭐';
+  document.getElementById('spicyDesc').textContent='Tap to rate the heat 🔥';
+  document.getElementById('humorDesc').textContent='How funny was it? 👑';
+  document.getElementById('tearDesc').textContent='How emotional was it? 💧';
+  document.getElementById('fluffDesc').textContent='How fluffy was it? 🩷';
+
+  // Read again — nothing selected
+  currentReadAgain=undefined;
+  ['thumbUp','thumbDown','thumbMaybe'].forEach(id=>document.getElementById(id).classList.remove('active'));
+
+  // Standalone/Series — nothing selected
+  currentSeriesType=null;
+  ['btnStandalone','btnSeries'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById('inputSeriesName').style.display='none';
+
+  // Format — nothing selected (no default)
+  currentFormat='physical';
+  document.querySelectorAll('.format-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fanficLinkGroup').style.display='none';
+
+  // Tropes, couple type, genre — nothing selected
+  selectedTropes=[];
+  document.querySelectorAll('.trope-option').forEach(t=>t.classList.remove('selected'));
+  currentCoupleType='mf';
+  document.querySelectorAll('#coupleTypePicker .trope-option').forEach(o=>o.classList.remove('selected'));
+  currentGenre='';
+  document.querySelectorAll('#genrePicker .trope-option').forEach(o=>o.classList.remove('selected'));
+
+  // Cover
+  currentCoverDataURL=null;
+  document.getElementById('coverPreview').style.display='none';
+  document.getElementById('coverUploadPrompt').style.display='block';
+  document.getElementById('coverChangeBtn').style.display='none';
+  document.getElementById('coverFileInput').value='';
+
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+function setRating(n) {
+  currentRating=n;
+  document.querySelectorAll('.star-btn').forEach((s,i)=>s.classList.toggle('lit',i<n));
+  document.getElementById('starDesc').textContent = STAR_LABELS[n] || '';
+}
+
+function setSpicy(n) {
+  currentSpicy=n;
+  document.querySelectorAll('.chili-btn').forEach((c,i)=>c.classList.toggle('lit',i<n));
+  document.getElementById('spicyDesc').textContent=SPICY_LABELS[n]||'';
+}
+function setHumor(n) {
+  currentHumor=n;
+  document.querySelectorAll('#humorInput .extra-btn').forEach((b,i)=>b.classList.toggle('lit',i<n));
+  document.getElementById('humorDesc').textContent=HUMOR_LABELS[n]||'';
+}
+function setTear(n) {
+  currentTear=n;
+  document.querySelectorAll('#tearInput .extra-btn').forEach((b,i)=>b.classList.toggle('lit',i<n));
+  document.getElementById('tearDesc').textContent=TEAR_LABELS[n]||'';
+}
+function setFluff(n) {
+  currentFluff=n;
+  document.querySelectorAll('#fluffInput .extra-btn').forEach((b,i)=>b.classList.toggle('lit',i<n));
+  document.getElementById('fluffDesc').textContent=FLUFF_LABELS[n]||'';
+}
+function setReadAgain(val) {
+  currentReadAgain=val;
+  document.getElementById('thumbUp').classList.toggle('active', val===true);
+  document.getElementById('thumbDown').classList.toggle('active', val===false);
+  document.getElementById('thumbMaybe').classList.toggle('active', val===null);
+}
+function setSeriesType(val) {
+  currentSeriesType=val;
+  document.getElementById('btnStandalone').classList.toggle('active', val==='standalone');
+  document.getElementById('btnSeries').classList.toggle('active', val==='series');
+  document.getElementById('inputSeriesName').style.display = val==='series' ? 'block' : 'none';
+}
+
+function setCoupleType(el, val) {
+  currentCoupleType = val;
+  document.querySelectorAll('#coupleTypePicker .trope-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function setGenre(el, val) {
+  currentGenre = val;
+  document.querySelectorAll('#genrePicker .trope-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function setFormat(el, fmt) {
+  currentFormat = fmt;
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('fanficLinkGroup').style.display = fmt==='fanfic' ? 'block' : 'none';
+  if(fmt!=='fanfic') document.getElementById('inputFanficLink').value='';
+}
+
+function toggleTrope(el,key) {
+  if(selectedTropes.includes(key)){selectedTropes=selectedTropes.filter(t=>t!==key);el.classList.remove('selected');}
+  else{selectedTropes.push(key);el.classList.add('selected');}
+}
+
+function handleCoverUpload(event) {
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    currentCoverDataURL=e.target.result;
+    const preview=document.getElementById('coverPreview');
+    preview.src=currentCoverDataURL;
+    preview.style.display='block';
+    document.getElementById('coverUploadPrompt').style.display='none';
+    document.getElementById('coverChangeBtn').style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveBook() {
+  const title=document.getElementById('inputTitle').value.trim();
+  if(!title){document.getElementById('inputTitle').focus();return;}
+  const emojiOptions=BOOK_EMOJIS;
+  const bookData={
+    title,
+    author:document.getElementById('inputAuthor').value.trim(),
+    rating:currentRating,
+    spicy:currentSpicy,
+    tropes:[...selectedTropes],
+    genre:currentGenre,
+    couple:document.getElementById('inputCouple').value.trim(),
+    coupleType:currentCoupleType,
+    emoji:'📖',
+    coverImage:currentCoverDataURL||null,
+    dateStart:document.getElementById('inputDateStart').value||null,
+    dateEnd:document.getElementById('inputDateEnd').value||null,
+    format:currentFormat,
+    humor:currentHumor||0,
+    tear:currentTear||0,
+    fluff:currentFluff||0,
+    fanficLink:currentFormat==='fanfic'?(document.getElementById('inputFanficLink').value.trim()||null):null,
+    readAgain:currentReadAgain,
+    seriesType:currentSeriesType||null,
+    seriesName:document.getElementById('inputSeriesName').value.trim()||null,
+  };
+  if(editingIdx>=0){
+    const existing=books[editingIdx];
+    books[editingIdx]={...existing,...bookData};
+  } else {
+    books.unshift({id:Date.now(),...bookData,added:new Date().toISOString()});
+  }
+  saveBooks();
+  closeAddModal();
+  renderAll();
+  // Show backup prompt after every save
+  showBackupReminder();
+}
+
+
+// EDIT
+function openEditModal(idx) {
+  const b=books[idx];
+  editingIdx=idx;
+  document.getElementById('addModalTitle').textContent='Edit Book';
+  document.getElementById('saveBookBtn').textContent='Save Changes ✨';
+  document.getElementById('inputTitle').value=b.title||'';
+  document.getElementById('inputAuthor').value=b.author||'';
+  document.getElementById('inputCouple').value=b.couple||'';
+
+  document.getElementById('inputDateStart').value=b.dateStart||'';
+  document.getElementById('inputDateEnd').value=b.dateEnd||'';
+
+
+  currentRating=b.rating||0;
+  document.querySelectorAll('.star-btn').forEach((s,i)=>s.classList.toggle('lit',i<currentRating));
+  document.getElementById('starDesc').textContent=STAR_LABELS[currentRating]||'Tap to rate the book';
+  currentSpicy=b.spicy||0;
+  document.querySelectorAll('.chili-btn').forEach((c,i)=>c.classList.toggle('lit',i<currentSpicy));
+  document.getElementById('spicyDesc').textContent=SPICY_LABELS[currentSpicy]||'Tap to rate the heat';
+  selectedTropes=[...(b.tropes||[])];
+  document.querySelectorAll('.trope-option').forEach(t=>{
+    const m=t.getAttribute('onclick').match(/toggleTrope\(this,'([^']+)'\)/);
+    if(m) t.classList.toggle('selected', selectedTropes.includes(m[1]));
+  });
+  currentFormat=b.format||'physical';
+  currentCoupleType=b.coupleType||'mf';
+  document.querySelectorAll('#coupleTypePicker .trope-option').forEach(o=>o.classList.toggle('selected',o.textContent.trim().toLowerCase()===({'mf':'m/f','mm':'m/m','ff':'f/f','other':'other / poly'}[currentCoupleType]||'').toLowerCase()));
+  currentGenre=b.genre||'';
+  document.querySelectorAll('#genrePicker .trope-option').forEach(o=>o.classList.toggle('selected',o.textContent.trim()===currentGenre));
+  currentHumor=b.humor||0;
+  document.querySelectorAll('#humorInput .extra-btn').forEach((b2,i)=>b2.classList.toggle('lit',i<currentHumor));
+  document.getElementById('humorDesc').textContent=HUMOR_LABELS[currentHumor]||'How funny was it? 👑';
+  currentTear=b.tear||0;
+  document.querySelectorAll('#tearInput .extra-btn').forEach((b2,i)=>b2.classList.toggle('lit',i<currentTear));
+  document.getElementById('tearDesc').textContent=TEAR_LABELS[currentTear]||'How emotional was it? 💧';
+  currentFluff=b.fluff||0;
+  document.querySelectorAll('#fluffInput .extra-btn').forEach((b2,i)=>b2.classList.toggle('lit',i<currentFluff));
+  document.getElementById('fluffDesc').textContent=FLUFF_LABELS[currentFluff]||'How fluffy was it? 🩷';
+  document.getElementById('inputFanficLink').value=b.fanficLink||'';
+  document.getElementById('fanficLinkGroup').style.display=b.format==='fanfic'?'block':'none';
+  currentReadAgain=b.readAgain; setReadAgain(b.readAgain);
+  currentSeriesType=b.seriesType||null; if(b.seriesType) setSeriesType(b.seriesType);
+  document.getElementById('inputSeriesName').value=b.seriesName||'';
+  document.querySelectorAll('.format-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.format===currentFormat));
+  currentCoverDataURL=b.coverImage||null;
+  if(b.coverImage){
+    document.getElementById('coverPreview').src=b.coverImage;
+    document.getElementById('coverPreview').style.display='block';
+    document.getElementById('coverUploadPrompt').style.display='none';
+    document.getElementById('coverChangeBtn').style.display='block';
+  } else {
+    document.getElementById('coverPreview').style.display='none';
+    document.getElementById('coverUploadPrompt').style.display='block';
+    document.getElementById('coverChangeBtn').style.display='none';
+  }
+  document.getElementById('detailModal').classList.remove('open');
+  document.getElementById('addModal').classList.add('open');
+}
+
+// RE-READ
+let rereadingIdx=-1;
+let currentRereadRating=0;
+let currentRereadSpicy=0;
+
+function openRereadModal(idx){
+  rereadingIdx=idx;
+  currentRereadRating=0; currentRereadSpicy=0;
+  document.getElementById('rereadBookTitle').textContent='"'+books[idx].title+'"';
+  document.getElementById('rereadDateStart').value='';
+  document.getElementById('rereadDateEnd').value='';
+  document.querySelectorAll('#rereadStarInput .star-btn').forEach(s=>s.classList.remove('lit'));
+  document.querySelectorAll('#rereadChiliInput .chili-btn').forEach(c=>c.classList.remove('lit'));
+  document.getElementById('rereadStarDesc').textContent='Tap to rate';
+  document.getElementById('rereadSpicyDesc').textContent='Tap to rate the heat';
+  document.getElementById('detailModal').classList.remove('open');
+  document.getElementById('rereadModal').classList.add('open');
+}
+function closeRereadModal(){ document.getElementById('rereadModal').classList.remove('open'); }
+
+function setRereadRating(n){
+  currentRereadRating=n;
+  document.querySelectorAll('#rereadStarInput .star-btn').forEach((s,i)=>s.classList.toggle('lit',i<n));
+  document.getElementById('rereadStarDesc').textContent=STAR_LABELS[n]||'';
+}
+function setRereadSpicy(n){
+  currentRereadSpicy=n;
+  document.querySelectorAll('#rereadChiliInput .chili-btn').forEach((c,i)=>c.classList.toggle('lit',i<n));
+  document.getElementById('rereadSpicyDesc').textContent=SPICY_LABELS[n]||'';
+}
+function saveReread(){
+  if(rereadingIdx<0) return;
+  const b=books[rereadingIdx];
+  if(!b.rereads) b.rereads=[];
+  b.rereads.push({
+    rating:currentRereadRating,
+    spicy:currentRereadSpicy,
+    dateStart:document.getElementById('rereadDateStart').value||null,
+    dateEnd:document.getElementById('rereadDateEnd').value||null,
+    added:new Date().toISOString()
+  });
+  saveBooks();
+  closeRereadModal();
+  openDetail(rereadingIdx);
+  renderAll();
+}
+
+// DETAIL MODAL
+function openDetail(idx) {
+  const b=books[idx];
+  const cover=document.getElementById('detailCover');
+  if(b.coverImage){
+    cover.innerHTML=`<img src="${b.coverImage}" alt="${b.title}" />`;
+    cover.style.background='';
+    cover.style.paddingBottom='20px';
+  } else {
+    cover.style.background='';
+    cover.style.paddingBottom='20px';
+    cover.innerHTML=`<div class="book-detail-cover-placeholder">${b.emoji||'📖'}</div>`;
+  }
+  document.getElementById('detailTitle').textContent=b.title;
+  document.getElementById('detailAuthor').textContent=b.author?'by '+b.author:'';
+
+  // Dates
+  const datesEl=document.getElementById('detailDates');
+  if(b.dateStart||b.dateEnd){
+    const fmt=(d)=>{ if(!d) return '?'; const p=d.split('-'); return `${p[1]}/${p[2]}/${p[0]}`; };
+    datesEl.textContent=`📅 ${b.dateStart?fmt(b.dateStart):'?'} → ${b.dateEnd?fmt(b.dateEnd):'currently reading 📖'}`;
+  } else { datesEl.textContent=''; }
+
+  // Format
+  const fmtMap = {physical:'📚 Physical book', ebook:'📱 eBook', audio:'🎧 Audiobook', fanfic:'✍️ Fanfic'};
+  const fmtEl = document.getElementById('detailFormat');
+  fmtEl.textContent = b.format ? fmtMap[b.format] || '' : '';
+
+  document.getElementById('detailStars').innerHTML=renderStars(b.rating);
+  document.getElementById('detailSpicy').innerHTML=renderChilis(b.spicy);
+
+  const humorWrap=document.getElementById('detailHumorWrap');
+  const tearWrap=document.getElementById('detailTearWrap');
+  if(b.humor){
+    humorWrap.style.display='block';
+    document.getElementById('detailHumor').textContent='👑'.repeat(b.humor);
+  } else { humorWrap.style.display='none'; }
+  if(b.tear){
+    tearWrap.style.display='block';
+    document.getElementById('detailTear').textContent='💧'.repeat(b.tear);
+  } else { tearWrap.style.display='none'; }
+
+  const fluffWrap=document.getElementById('detailFluffWrap');
+  if(b.fluff){
+    fluffWrap.style.display='block';
+    document.getElementById('detailFluff').textContent='🩷'.repeat(b.fluff);
+  } else { fluffWrap.style.display='none'; }
+
+  const fanficLinkWrap=document.getElementById('detailFanficLinkWrap');
+  if(b.fanficLink){
+    fanficLinkWrap.style.display='block';
+    document.getElementById('detailFanficLink').href=b.fanficLink;
+  } else { fanficLinkWrap.style.display='none'; }
+
+  // Read again + series
+  const raEl=document.getElementById('detailReadAgain');
+  if(b.readAgain===true) raEl.innerHTML=`<span style="font-size:22px">👍</span> <span style="font-size:13px;color:var(--sage);font-weight:500">Would read again!</span>`;
+  else if(b.readAgain===false) raEl.innerHTML=`<span style="font-size:22px">👎</span> <span style="font-size:13px;color:var(--muted);font-weight:500">Wouldn't read again</span>`;
+  else if(b.readAgain===null) raEl.innerHTML=`<span style="font-size:22px">🤷</span> <span style="font-size:13px;color:var(--muted);font-weight:500">Maybe would re-read</span>`;
+  else raEl.innerHTML='';
+
+  const seriesEl=document.getElementById('detailSeries');
+  const seriesWrap=document.getElementById('detailSeriesWrap');
+  if(b.seriesType){
+    seriesWrap.style.display='block';
+    seriesEl.innerHTML=b.seriesType==='series'
+      ? '📚 Series' + (b.seriesName ? ` — <em style="color:var(--plum)">${b.seriesName}</em>` : '')
+      : '📗 Standalone';
+  } else { seriesWrap.style.display='none'; }
+
+  document.getElementById('detailGenre').innerHTML=b.genre?`<span class="detail-pill pill-genre">${b.genre}</span>`:'';
+
+  const coupleWrap=document.getElementById('detailCoupleWrap');
+  if(b.couple&&b.couple.trim()){
+    coupleWrap.style.display='block';
+    document.getElementById('detailCoupleName').textContent=b.couple;
+  } else { coupleWrap.style.display='none'; }
+
+  const tropeRow=document.getElementById('detailTropes');
+  tropeRow.innerHTML=b.tropes&&b.tropes.length
+    ?b.tropes.map(t=>`<span class="detail-pill pill-trope">${TROPES_MAP[t]||t}</span>`).join('')
+    :'<span style="font-size:13px;color:var(--muted)">No tropes logged</span>';
+
+  document.getElementById('detailDeleteBtn').onclick=()=>deleteBook(idx);
+  document.getElementById('detailEditBtn').onclick=()=>openEditModal(idx);
+  document.getElementById('detailRereadBtn').onclick=()=>openRereadModal(idx);
+
+  // show rereads
+  const rereadsWrap=document.getElementById('detailRereadsWrap');
+  const rereadsEl=document.getElementById('detailRereads');
+  if(b.rereads&&b.rereads.length){
+    rereadsWrap.style.display='block';
+    const fmt=(d)=>{ if(!d) return '?'; const p=d.split('-'); return p[1]+'/'+p[2]+'/'+p[0]; };
+    rereadsEl.innerHTML=b.rereads.map((r,ri)=>{
+      const stars=r.rating?'&#11088;'.repeat(r.rating):'No rating';
+      const fires=r.spicy?'&#128293;'.repeat(r.spicy):'';
+      const dates=(r.dateStart||r.dateEnd)?'&#128197; '+(r.dateStart?fmt(r.dateStart):'?')+' &rarr; '+(r.dateEnd?fmt(r.dateEnd):'In progress'):'';
+      return '<div class="reread-entry"><div class="reread-num">Read #'+(ri+2)+'</div>'+(dates?'<div class="reread-dates">'+dates+'</div>':'')+'<div class="reread-ratings"><span style="color:var(--gold)">'+stars+'</span>'+(fires?'<span>'+fires+'</span>':'')+'</div></div>';
+    }).join('');
+  } else { rereadsWrap.style.display='none'; }
+
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function deleteBook(idx) {
+  books.splice(idx,1);
+  saveBooks();
+  document.getElementById('detailModal').classList.remove('open');
+  renderAll();
+}
+
+document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
+document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)document.getElementById('detailModal').classList.remove('open');});
+document.getElementById('rereadModal').addEventListener('click',function(e){if(e.target===this)closeRereadModal();});
+
+function exportBooks() {
+  const data = { books, exportedAt: new Date().toISOString(), version: 'quena-books-v2' };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'quenas-library-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importBooks(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = data.books || data;
+      if (!Array.isArray(imported)) throw new Error('Invalid file');
+      // Merge: keep existing books, add any from backup that aren't already there
+      const existingIds = new Set(books.map(b => b.id));
+      const newBooks = imported.filter(b => !existingIds.has(b.id));
+      books = [...books, ...newBooks];
+      saveBooks();
+      renderAll();
+      document.getElementById('restoreMsg').innerHTML = '<span style="color:var(--sage)">✅ Restored ' + imported.length + ' books!</span>';
+      document.getElementById('restoreFileInput').value = '';
+    } catch(err) {
+      document.getElementById('restoreMsg').innerHTML = '<span style="color:#C62828">❌ Invalid backup file</span>';
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Backup reminder toast
+let backupReminderShown = false;
+function showBackupReminder() {
+  // Only show once per session, after adding/editing books
+  if (backupReminderShown) return;
+  backupReminderShown = true;
+  const toast = document.createElement('div');
+  toast.id = 'backupToast';
+  toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--deep);color:var(--cream);padding:12px 18px;border-radius:20px;font-size:13px;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:320px;width:90%';
+  toast.innerHTML = `<span>💾 Tap to save a backup</span><button onclick="exportBooks();this.parentElement.remove()" style="background:var(--gold);color:var(--deep);border:none;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap">Save now</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:0 2px;touch-action:manipulation">✕</button>`;
+  document.body.appendChild(toast);
+  // Auto dismiss after 8 seconds
+  setTimeout(() => { if(toast.parentElement) toast.remove(); }, 8000);
+}
+
+async function maybeSeedData() {
+  await loadBooks();
+}
+
+maybeSeedData();
+document.getElementById('addBookBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  openAddModal();
+});
+document.getElementById('backupBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('backupModal').classList.add('open');
+});
+document.getElementById('backupModal').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
+</script>
+</body>
+</html>
