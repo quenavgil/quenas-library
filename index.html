@@ -10,17 +10,17 @@
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
   :root {
-    --cream: #FAF6F1;
-    --blush: #E8C4B8;
-    --rose: #C97B84;
-    --deep: #3D2B35;
-    --plum: #6B3A4F;
-    --gold: #C9A96E;
-    --sage: #8A9E8C;
-    --text: #2C1D25;
-    --muted: #9B7E8A;
+    --cream: #F5F0F8;
+    --blush: #D4B8E0;
+    --rose: #C2607A;
+    --deep: #1A1F3C;
+    --plum: #2D3470;
+    --gold: #E8B4C8;
+    --sage: #7B8EC8;
+    --text: #1A1F3C;
+    --muted: #8A8BAE;
     --card: #FFFFFF;
-    --border: #EDE0D8;
+    --border: #E0D8F0;
     --chili: #E05C5C;
   }
 
@@ -597,7 +597,7 @@
 <div class="top-bar">
   <div>
     <div class="app-title"><span>Quena's</span> Library</div>
-    <div class="app-subtitle">My reading world</div>
+    <div class="app-subtitle">Where stories live ✨</div>
   </div>
   <div class="top-bar-right">
     <button class="backup-btn" id="backupBtn" title="Backup & Restore">💾</button>
@@ -831,7 +831,7 @@
           </div>
           <div class="cover-change-btn" id="coverChangeBtn">Change photo</div>
         </div>
-        <input type="file" id="coverFileInput" accept="image/*" onchange="handleCoverUpload(event)" />
+        <input type="file" id="coverFileInput" accept="image/png, image/jpeg, image/gif, image/webp, image/heic, image/heif" onchange="handleCoverUpload(event)" />
       </div>
 
       <div class="field-group">
@@ -1618,7 +1618,10 @@ function openAddModal() {
   document.getElementById('coverChangeBtn').style.display='none';
   document.getElementById('coverFileInput').value='';
 
-  document.getElementById('addModal').classList.add('open');
+  const m = document.getElementById('addModal');
+  m.classList.add('open');
+  const mb = m.querySelector('.modal-body');
+  if(mb) mb.scrollTop = 0;
 }
 function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
 
