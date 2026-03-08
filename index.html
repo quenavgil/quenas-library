@@ -1872,7 +1872,10 @@ function openEditModal(idx) {
     document.getElementById('coverChangeBtn').style.display='none';
   }
   document.getElementById('detailModal').classList.remove('open');
-  document.getElementById('addModal').classList.add('open');
+  const editModal = document.getElementById('addModal');
+  editModal.classList.add('open');
+  const editBody = editModal.querySelector('.modal-body');
+  if (editBody) setTimeout(function(){ editBody.scrollTop = 0; }, 10);
 }
 
 // RE-READ
