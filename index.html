@@ -1155,6 +1155,12 @@
 </div>
 
 <script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 👇 PASTE YOUR SUPABASE KEYS HERE
+const SUPABASE_URL = 'https://uwiugumxmuqjpzcqjrxd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_h6IqnmqjQ-NRC4MpVt4omw_KqroX7f2';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 const TROPES_MAP = {
   'enemies-to-lovers':'Enemies to Lovers','second-chance':'Second Chance','fake-dating':'Fake Dating',
   'friends-to-lovers':'Friends to Lovers','forced-proximity':'Forced Proximity','grumpy-sunshine':'Grumpy × Sunshine',
@@ -1195,27 +1201,60 @@ let currentGenre = '';
 
 async function loadBooks() {
   try {
-    const val = localStorage.getItem('quena-books-v2');
-    if (val) {
-      books = JSON.parse(val);
-    } else {
-      // Try the auto-backup copy if main key is missing
-      const bak = localStorage.getItem('quena-books-autobak');
-      if (bak) {
-        const parsed = JSON.parse(bak);
-        books = parsed.books || parsed;
-        // Restore to main key
-        localStorage.setItem('quena-books-v2', JSON.stringify(books));
+    const res = await fetch(SUPABASE_URL + '/rest/v1/books?select=*&order=created_at.asc', {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
       }
+    });
+    if (res.ok) {
+      const rows = await res.json();
+      books = rows.map(r => r.data);
+    } else {
+      // Fallback to localStorage if Supabase fails
+      const val = localStorage.getItem('quena-books-v2');
+      if (val) books = JSON.parse(val);
     }
-  } catch(e) { books = []; }
+  } catch(e) {
+    // Fallback to localStorage if offline
+    try {
+      const val = localStorage.getItem('quena-books-v2');
+      if (val) books = JSON.parse(val);
+    } catch(e2) { books = []; }
+  }
   renderAll();
 }
 
 async function saveBooks() {
+  // Save to Supabase (cloud) — primary storage
+  try {
+    // Upsert all books
+    const payload = books.map(b => ({ id: b.id, data: b }));
+    await fetch(SUPABASE_URL + '/rest/v1/books', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+  // Also keep localStorage as backup
   try { localStorage.setItem('quena-books-v2', JSON.stringify(books)); } catch(e) {}
-  // Also keep an auto-backup in localStorage as a second copy
-  try { localStorage.setItem('quena-books-autobak', JSON.stringify({books, savedAt: new Date().toISOString()})); } catch(e) {}
+}
+
+async function deleteBookFromDB(id) {
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/books?id=eq.' + id, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      }
+    });
+  } catch(e) {}
 }
 
 function autoBackupToFile() {
@@ -1702,7 +1741,7 @@ function handleCoverUpload(event) {
   reader.readAsDataURL(file);
 }
 
-function saveBook() {
+async function saveBook() {
   const title=document.getElementById('inputTitle').value.trim();
   if(!title){document.getElementById('inputTitle').focus();return;}
   const emojiOptions=BOOK_EMOJIS;
@@ -1734,11 +1773,9 @@ function saveBook() {
   } else {
     books.unshift({id:Date.now(),...bookData,added:new Date().toISOString()});
   }
-  saveBooks();
+  await saveBooks();
   closeAddModal();
   renderAll();
-  // Show backup prompt after every save
-  showBackupReminder();
 }
 
 
@@ -1953,9 +1990,12 @@ function openDetail(idx) {
   document.getElementById('detailModal').classList.add('open');
 }
 
-function deleteBook(idx) {
+async function deleteBook(idx) {
+  if(!confirm('Delete this book?')) return;
+  const bookId = books[idx].id;
   books.splice(idx,1);
-  saveBooks();
+  await deleteBookFromDB(bookId);
+  await saveBooks();
   document.getElementById('detailModal').classList.remove('open');
   renderAll();
 }
@@ -2001,20 +2041,7 @@ function importBooks(event) {
   reader.readAsText(file);
 }
 
-// Backup reminder toast
-let backupReminderShown = false;
-function showBackupReminder() {
-  // Only show once per session, after adding/editing books
-  if (backupReminderShown) return;
-  backupReminderShown = true;
-  const toast = document.createElement('div');
-  toast.id = 'backupToast';
-  toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--deep);color:var(--cream);padding:12px 18px;border-radius:20px;font-size:13px;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:320px;width:90%';
-  toast.innerHTML = `<span>💾 Tap to save a backup</span><button onclick="exportBooks();this.parentElement.remove()" style="background:var(--gold);color:var(--deep);border:none;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap">Save now</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:16px;cursor:pointer;padding:0 2px;touch-action:manipulation">✕</button>`;
-  document.body.appendChild(toast);
-  // Auto dismiss after 8 seconds
-  setTimeout(() => { if(toast.parentElement) toast.remove(); }, 8000);
-}
+function showBackupReminder() {} // Supabase saves automatically
 
 async function maybeSeedData() {
   await loadBooks();
