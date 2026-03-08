@@ -1330,9 +1330,13 @@ function renderBooks() {
       const d = b.dateEnd || b.dateStart || b.added;
       return d ? new Date(d).getFullYear() : null;
     }).filter(Boolean))].sort((a,b) => b-a);
-    yearRow.innerHTML = ['all', ...years].map(y =>
-      `<div class="filter-chip${currentLibraryYear==y?' active':''}" onclick="setLibraryYear(${y==='all'?'\'all\'':\`${y}\`},this)">${y==='all'?'All Years':y}</div>`
-    ).join('');
+    const allYears = ['all'].concat(years);
+    yearRow.innerHTML = allYears.map(function(y) {
+      var label = y === 'all' ? 'All Years' : y;
+      var active = (String(currentLibraryYear) === String(y)) ? ' active' : '';
+      var arg = y === 'all' ? "'all'" : y;
+      return '<div class="filter-chip' + active + '" onclick="setLibraryYear(' + arg + ',this)">' + label + '</div>';
+    }).join('');
   }
 
   let filtered = books;
