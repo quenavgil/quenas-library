@@ -641,13 +641,6 @@
     <div class="filter-chip active" onclick="filterBooks('all', this)">All</div>
     <div class="filter-chip" onclick="filterBooks('5', this)">⭐ 5 Stars</div>
     <div class="filter-chip" onclick="filterBooks('spicy5', this)">🔥🔥🔥 Max Spice</div>
-    <div class="filter-chip" onclick="filterBooks('4', this)">4+ Stars</div>
-    <div class="filter-chip" onclick="filterBooks('enemies', this)">Enemies to Lovers</div>
-    <div class="filter-chip" onclick="filterBooks('second-chance', this)">Second Chance</div>
-    <div class="filter-chip" onclick="filterBooks('fake', this)">Fake Dating</div>
-    <div class="filter-chip" onclick="filterBooks('friends', this)">Friends to Lovers</div>
-    <div class="filter-chip" onclick="filterBooks('forced', this)">Forced Proximity</div>
-    <div class="filter-chip" onclick="filterBooks('grumpy', this)">Grumpy × Sunshine</div>
   </div>
   <div class="book-grid" id="bookGrid"></div>
   <div class="empty-state" id="emptyState">
@@ -1192,7 +1185,7 @@ let currentRating = 0;
 let currentSpicy = 0;
 let selectedTropes = [];
 let currentFilter = 'all';
-let currentLibraryYear = 'all';
+let currentLibraryYear = new Date().getFullYear();
 let currentCoupleFilter = 'all';
 let currentCoverDataURL = null;
 let currentFormat = 'physical';
@@ -1288,26 +1281,31 @@ function renderAll() {
 }
 
 function updateStats() {
-  const yr = new Date().getFullYear();
-  // split fanfics vs books (for current year display in badge)
-  const booksOnly = books.filter(b=>b.format!=='fanfic');
-  const fanfics = books.filter(b=>b.format==='fanfic');
-  // Count re-reads towards total
-  const rereadCount = books.reduce((sum, b) => sum + ((b.rereads && b.rereads.length) || 0), 0);
-  document.getElementById('statsTotal').textContent = booksOnly.length + booksOnly.reduce((s,b)=>s+((b.rereads&&b.rereads.length)||0),0);
-  document.getElementById('statsFanfics').textContent = fanfics.length + fanfics.reduce((s,b)=>s+((b.rereads&&b.rereads.length)||0),0);
-  const total = books.length + rereadCount;
+  // Filter by selected year (or all)
+  var filtered = books;
+  if (currentLibraryYear !== 'all') {
+    filtered = books.filter(function(b) {
+      var d = b.dateEnd || b.dateStart || b.added;
+      return d && new Date(d).getFullYear() == currentLibraryYear;
+    });
+  }
+  var booksOnly = filtered.filter(function(b) { return b.format !== 'fanfic'; });
+  var fanfics = filtered.filter(function(b) { return b.format === 'fanfic'; });
+  var rereadBooks = booksOnly.reduce(function(s,b){ return s+((b.rereads&&b.rereads.length)||0); }, 0);
+  var rereadFanfics = fanfics.reduce(function(s,b){ return s+((b.rereads&&b.rereads.length)||0); }, 0);
+  document.getElementById('statsTotal').textContent = booksOnly.length + rereadBooks;
+  document.getElementById('statsFanfics').textContent = fanfics.length + rereadFanfics;
+  var total = filtered.length;
   if (total === 0) {
     document.getElementById('statsAvg').textContent = '—';
     document.getElementById('statsSpicy').textContent = '—';
     return;
   }
-  const rated = books.filter(b=>b.rating>0);
-  const avg = rated.length ? (rated.reduce((a,b)=>a+b.rating,0)/rated.length).toFixed(1) : '—';
+  var rated = filtered.filter(function(b){ return b.rating>0; });
+  var avg = rated.length ? (rated.reduce(function(a,b){ return a+b.rating; },0)/rated.length).toFixed(1) : '—';
   document.getElementById('statsAvg').textContent = avg !== '—' ? '⭐'+avg : '—';
-
-  const spiced = books.filter(b=>b.spicy>0);
-  const avgSpicy = spiced.length ? (spiced.reduce((a,b)=>a+b.spicy,0)/spiced.length).toFixed(1) : '—';
+  var spiced = filtered.filter(function(b){ return b.spicy>0; });
+  var avgSpicy = spiced.length ? (spiced.reduce(function(a,b){ return a+b.spicy; },0)/spiced.length).toFixed(1) : '—';
   document.getElementById('statsSpicy').textContent = avgSpicy !== '—' ? avgSpicy+'🔥' : '—';
 }
 
@@ -1493,45 +1491,46 @@ function renderShelf() {
 }
 
 function renderCouples() {
-  const list=document.getElementById('couplesList');
-  const empty=document.getElementById('emptyCouples');
-  let filtered=books.filter(b=>b.couple&&b.couple.trim());
-  if(currentCoupleFilter!=='all') filtered=filtered.filter(b=>b.coupleType===currentCoupleFilter);
-  if(filtered.length===0){list.innerHTML='';empty.style.display='block';return;}
-  empty.style.display='none';
+  const list = document.getElementById('couplesList');
+  const empty = document.getElementById('emptyCouples');
+  let filtered = books.filter(function(b) { return b.couple && b.couple.trim(); });
+  if (currentCoupleFilter !== 'all') {
+    filtered = filtered.filter(function(b) { return b.coupleType === currentCoupleFilter; });
+  }
+  if (filtered.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
 
-  // Deduplicate by couple name — keep the most recently read entry
-  const seen = {};
-  filtered.forEach(b => {
-    const key = b.couple.trim().toLowerCase();
-    if(!seen[key]) {
-      seen[key] = b;
-    } else {
-      // Keep whichever has a more recent date
-      const existing = seen[key];
-      const da = b.dateEnd || b.dateStart || b.added || '';
-      const db = existing.dateEnd || existing.dateStart || existing.added || '';
-      if(da > db) seen[key] = b;
-    }
+  // Group all books by couple name
+  var groups = {};
+  filtered.forEach(function(b) {
+    var key = b.couple.trim().toLowerCase();
+    if (!groups[key]) groups[key] = { name: b.couple.trim(), books: [] };
+    groups[key].books.push(b);
   });
-  const deduped = Object.values(seen);
 
-  list.innerHTML=deduped.map((b)=>{
-    const realIdx=books.indexOf(b);
-    const emoji=b.emoji||'📖';
-    const thumbHTML=b.coverImage
-      ?`<div class="couple-thumb"><img src="${b.coverImage}" alt="" /></div>`
-      :`<div class="couple-thumb" style="background:${getBookGradient(realIdx)}">${emoji}</div>`;
-    return `
-    <div class="couple-book-item" onclick="openDetail(${realIdx})">
-      ${thumbHTML}
-      <div class="couple-book-info">
-        <div class="couple-book-names">${b.couple}</div>
-        <div class="couple-book-title">${b.title}${b.author?' — '+b.author:''}</div>
-        <div style="font-size:11px;margin-top:2px">${b.spicy?'🔥'.repeat(b.spicy):''}</div>
-      </div>
-      <div class="couple-book-rating">${b.rating?b.rating+'★':''}</div>
-    </div>`;
+  list.innerHTML = Object.values(groups).map(function(group) {
+    var booksHTML = group.books.map(function(b) {
+      var realIdx = books.indexOf(b);
+      var emoji = b.emoji || '📖';
+      var thumbHTML = b.coverImage
+        ? '<div class="couple-thumb"><img src="' + b.coverImage + '" alt="" /></div>'
+        : '<div class="couple-thumb" style="background:' + getBookGradient(realIdx) + '">' + emoji + '</div>';
+      var formatBadge = b.format === 'fanfic' ? '<span style="font-size:10px;background:var(--blush);color:var(--deep);border-radius:6px;padding:1px 6px;margin-left:4px">fanfic</span>' : '';
+      return '<div class="couple-book-item" onclick="openDetail(' + realIdx + ')" style="padding-left:8px;border-left:3px solid var(--blush);margin-bottom:6px">'
+        + thumbHTML
+        + '<div class="couple-book-info">'
+        + '<div class="couple-book-title" style="font-weight:600">' + b.title + formatBadge + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (b.author || '') + '</div>'
+        + '<div style="font-size:11px;margin-top:2px">' + (b.spicy ? '🔥'.repeat(b.spicy) : '') + '</div>'
+        + '</div>'
+        + '<div class="couple-book-rating">' + (b.rating ? b.rating + '★' : '') + '</div>'
+        + '</div>';
+    }).join('');
+
+    return '<div style="margin-bottom:18px">'
+      + '<div style="font-size:15px;font-weight:700;color:var(--deep);padding:6px 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px">💕 ' + group.name + '</div>'
+      + booksHTML
+      + '</div>';
   }).join('');
 }
 
