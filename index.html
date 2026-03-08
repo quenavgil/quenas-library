@@ -636,6 +636,7 @@
 
 <!-- LIBRARY TAB -->
 <div class="section active" id="tab-library">
+  <div class="filter-row" id="yearFilterRow" style="margin-bottom:4px"></div>
   <div class="filter-row" id="filterRow">
     <div class="filter-chip active" onclick="filterBooks('all', this)">All</div>
     <div class="filter-chip" onclick="filterBooks('5', this)">⭐ 5 Stars</div>
@@ -1286,10 +1287,11 @@ function updateStats() {
   // split fanfics vs books (for current year display in badge)
   const booksOnly = books.filter(b=>b.format!=='fanfic');
   const fanfics = books.filter(b=>b.format==='fanfic');
-  document.getElementById('statsTotal').textContent = booksOnly.length;
-  document.getElementById('statsFanfics').textContent = fanfics.length;
-
-  const total = books.length;
+  // Count re-reads towards total
+  const rereadCount = books.reduce((sum, b) => sum + ((b.rereads && b.rereads.length) || 0), 0);
+  document.getElementById('statsTotal').textContent = booksOnly.length + booksOnly.reduce((s,b)=>s+((b.rereads&&b.rereads.length)||0),0);
+  document.getElementById('statsFanfics').textContent = fanfics.length + fanfics.reduce((s,b)=>s+((b.rereads&&b.rereads.length)||0),0);
+  const total = books.length + rereadCount;
   if (total === 0) {
     document.getElementById('statsAvg').textContent = '—';
     document.getElementById('statsSpicy').textContent = '—';
@@ -1320,7 +1322,27 @@ function renderChilis(spicy) {
 function renderBooks() {
   const grid = document.getElementById('bookGrid');
   const empty = document.getElementById('emptyState');
+
+  // Populate year filter
+  const yearRow = document.getElementById('yearFilterRow');
+  if (yearRow) {
+    const years = [...new Set(books.map(b => {
+      const d = b.dateEnd || b.dateStart || b.added;
+      return d ? new Date(d).getFullYear() : null;
+    }).filter(Boolean))].sort((a,b) => b-a);
+    yearRow.innerHTML = ['all', ...years].map(y =>
+      `<div class="filter-chip${currentLibraryYear==y?' active':''}" onclick="setLibraryYear(${y==='all'?'\'all\'':\`${y}\`},this)">${y==='all'?'All Years':y}</div>`
+    ).join('');
+  }
+
   let filtered = books;
+  // Filter by year
+  if (currentLibraryYear !== 'all') {
+    filtered = filtered.filter(b => {
+      const d = b.dateEnd || b.dateStart || b.added;
+      return d && new Date(d).getFullYear() == currentLibraryYear;
+    });
+  }
   if (currentFilter==='5') filtered=books.filter(b=>b.rating===5);
   else if (currentFilter==='4') filtered=books.filter(b=>b.rating>=4);
   else if (currentFilter==='spicy5') filtered=books.filter(b=>b.spicy===5);
@@ -1430,7 +1452,7 @@ function renderShelf() {
   }
   empty.style.display='none';
 
-  const chunkSize=8;
+  const chunkSize=10;
   const rows=[];
   for(let i=0;i<yearBooks.length;i+=chunkSize) rows.push(yearBooks.slice(i,i+chunkSize));
 
@@ -1588,6 +1610,13 @@ function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
+}
+
+function setLibraryYear(y, el) {
+  currentLibraryYear = y;
+  document.querySelectorAll('#yearFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderBooks();
 }
 
 function filterBooks(key,el) {
