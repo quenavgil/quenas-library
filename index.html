@@ -906,6 +906,10 @@
           <div class="trope-option" onclick="toggleTrope(this,'sports-romance')">Sports Romance</div>
           <div class="trope-option" onclick="toggleTrope(this,'small-town')">Small Town</div>
           <div class="trope-option" onclick="toggleTrope(this,'vacation-romance')">Vacation Romance</div>
+          <div class="trope-option" onclick="toggleTrope(this,'opposites-attract')">Opposites Attract</div>
+          <div class="trope-option" onclick="toggleTrope(this,'arranged-marriage')">Arranged Marriage</div>
+          <div class="trope-option" onclick="toggleTrope(this,'strangers-to-lovers')">Strangers to Lovers</div>
+          <div class="trope-option" onclick="toggleTrope(this,'pregnancy')">Pregnancy</div>
         </div>
       </div>
 
@@ -1167,7 +1171,7 @@ const TROPES_MAP = {
   'friends-to-lovers':'Friends to Lovers','forced-proximity':'Forced Proximity','grumpy-sunshine':'Grumpy × Sunshine',
   'slow-burn':'Slow Burn','why-choose':'Why Choose','forbidden':'Forbidden Love','instalove':'Instalove',
   'boss-employee':'Boss × Employee','age-gap':'Age Gap','single-parent':'Single Parent',
-  'sports-romance':'Sports Romance','small-town':'Small Town','vacation-romance':'Vacation Romance'
+  'sports-romance':'Sports Romance','small-town':'Small Town','vacation-romance':'Vacation Romance','opposites-attract':'Opposites Attract','arranged-marriage':'Arranged Marriage','strangers-to-lovers':'Strangers to Lovers','pregnancy':'Pregnancy'
 };
 
 const SPINE_COLORS = [
@@ -1456,7 +1460,7 @@ function renderShelf() {
   }
   empty.style.display='none';
 
-  const chunkSize=10;
+  const chunkSize=12;
   const rows=[];
   for(let i=0;i<yearBooks.length;i+=chunkSize) rows.push(yearBooks.slice(i,i+chunkSize));
 
@@ -1471,7 +1475,6 @@ function renderShelf() {
       </div>`;
     }).join('');
     return `<div class="wall-bg">
-      <div class="shelf-label">Shelf ${ri+1}</div>
       <div class="shelf-books">${spines}</div>
       <div class="shelf-plank"></div>
     </div>`;
