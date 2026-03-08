@@ -1357,7 +1357,7 @@ function renderBooks() {
       return d && new Date(d).getFullYear() == currentLibraryYear;
     });
   }
-  if (currentFilter==='5') filtered=books.filter(b=>b.rating===5);
+  if (currentFilter==='5') filtered=filtered.filter(b=>b.rating===5);
   else if (currentFilter==='4') filtered=books.filter(b=>b.rating>=4);
   else if (currentFilter==='spicy5') filtered=books.filter(b=>b.spicy===5);
   else if (currentFilter!=='all') {
@@ -1631,6 +1631,7 @@ function setLibraryYear(y, el) {
   document.querySelectorAll('#yearFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
   if(el) el.classList.add('active');
   renderBooks();
+  updateStats();
 }
 
 function filterBooks(key,el) {
