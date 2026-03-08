@@ -2059,22 +2059,29 @@ function importBooks(event) {
   const reader = new FileReader();
   reader.onload = async function(e) {
     try {
-      const data = JSON.parse(e.target.result);
-      const imported = data.books || data;
-      if (!Array.isArray(imported)) throw new Error('Invalid file');
-      // Merge: keep existing books, add any from backup that aren't already there
-      const existingIds = new Set(books.map(b => b.id));
-      const newBooks = imported.filter(b => !existingIds.has(b.id));
-      books = [...books, ...newBooks];
+      let raw = e.target.result;
+      // Strip BOM if present (iOS sometimes adds it)
+      if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1);
+      const data = JSON.parse(raw);
+      // Support both {books:[]} and plain [] formats
+      let imported = null;
+      if (Array.isArray(data)) {
+        imported = data;
+      } else if (data && Array.isArray(data.books)) {
+        imported = data.books;
+      }
+      if (!imported || imported.length === 0) throw new Error('No books found');
+      // Replace all books with backup (full restore)
+      books = imported;
       await saveBooks();
       renderAll();
       document.getElementById('restoreMsg').innerHTML = '<span style="color:var(--sage)">✅ Restored ' + imported.length + ' books!</span>';
       document.getElementById('restoreFileInput').value = '';
     } catch(err) {
-      document.getElementById('restoreMsg').innerHTML = '<span style="color:#C62828">❌ Invalid backup file</span>';
+      document.getElementById('restoreMsg').innerHTML = '<span style="color:#C62828">❌ Error: ' + err.message + '</span>';
     }
   };
-  reader.readAsText(file);
+  reader.readAsText(file, 'UTF-8');
 }
 
 function showBackupReminder() {} // Supabase saves automatically
