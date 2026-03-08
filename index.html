@@ -2057,7 +2057,7 @@ function importBooks(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     try {
       const data = JSON.parse(e.target.result);
       const imported = data.books || data;
@@ -2066,7 +2066,7 @@ function importBooks(event) {
       const existingIds = new Set(books.map(b => b.id));
       const newBooks = imported.filter(b => !existingIds.has(b.id));
       books = [...books, ...newBooks];
-      saveBooks();
+      await saveBooks();
       renderAll();
       document.getElementById('restoreMsg').innerHTML = '<span style="color:var(--sage)">✅ Restored ' + imported.length + ' books!</span>';
       document.getElementById('restoreFileInput').value = '';
