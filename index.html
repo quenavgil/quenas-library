@@ -2080,7 +2080,9 @@ async function maybeSeedData() {
   await loadBooks();
 }
 
-maybeSeedData();
+document.addEventListener('DOMContentLoaded', function() {
+  maybeSeedData();
+});
 document.getElementById('addBookBtn').addEventListener('click', function(e) {
   e.stopPropagation();
   openAddModal();
