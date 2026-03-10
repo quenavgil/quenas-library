@@ -243,10 +243,7 @@
     margin-top: 3px;
     font-weight: 600;
     letter-spacing: 0.3px;
-    animation: pulse-reading 2s ease-in-out infinite;
   }
-  @keyframes pulse-reading {
-    0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
   }
   .trope-pill-small {
@@ -903,6 +900,11 @@
           <div class="trope-option" onclick="toggleTrope(this,'arranged-marriage')">Arranged Marriage</div>
           <div class="trope-option" onclick="toggleTrope(this,'strangers-to-lovers')">Strangers to Lovers</div>
           <div class="trope-option" onclick="toggleTrope(this,'pregnancy')">Pregnancy</div>
+          <div class="trope-option" onclick="toggleTrope(this,'only-one-bed')">Only One Bed</div>
+          <div class="trope-option" onclick="toggleTrope(this,'soul-mates')">Soul Mates</div>
+          <div class="trope-option" onclick="toggleTrope(this,'workplace-romance')">Workplace Romance</div>
+          <div class="trope-option" onclick="toggleTrope(this,'best-friends-brother')">Best Friend's Brother</div>
+          <div class="trope-option" onclick="toggleTrope(this,'best-friends-sister')">Best Friend's Sister</div>
         </div>
       </div>
 
@@ -923,9 +925,7 @@
         <label class="field-label">Genre</label>
         <div class="trope-grid-picker" id="genrePicker">
           <div class="trope-option" onclick="setGenre(this,'Contemporary Romance')">Contemporary Romance</div>
-          <div class="trope-option" onclick="setGenre(this,'Fantasy Romance')">Fantasy Romance</div>
           <div class="trope-option" onclick="setGenre(this,'Historical Romance')">Historical Romance</div>
-          <div class="trope-option" onclick="setGenre(this,'Paranormal Romance')">Paranormal Romance</div>
           <div class="trope-option" onclick="setGenre(this,'Dark Romance')">Dark Romance</div>
           <div class="trope-option" onclick="setGenre(this,'Romantic Suspense')">Romantic Suspense</div>
           <div class="trope-option" onclick="setGenre(this,'New Adult')">New Adult</div>
@@ -935,36 +935,10 @@
           <div class="trope-option" onclick="setGenre(this,'Thriller')">Thriller</div>
           <div class="trope-option" onclick="setGenre(this,'Mystery')">Mystery</div>
           <div class="trope-option" onclick="setGenre(this,'Sci-Fi')">Sci-Fi</div>
-          <div class="trope-option" onclick="setGenre(this,'Non-Fiction')">Non-Fiction</div>
           <div class="trope-option" onclick="setGenre(this,'Other')">Other</div>
         </div>
       </div>
-      <div class="field-group">
-        <label class="field-label">Format</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div class="format-btn active" onclick="setFormat(this,'physical')" data-format="physical">
-            <div style="font-size:22px">📚</div>
-            <div style="font-size:11px;font-weight:500;margin-top:4px">Physical</div>
-          </div>
-          <div class="format-btn" onclick="setFormat(this,'ebook')" data-format="ebook">
-            <div style="font-size:22px">📱</div>
-            <div style="font-size:11px;font-weight:500;margin-top:4px">eBook</div>
-          </div>
-          <div class="format-btn" onclick="setFormat(this,'audio')" data-format="audio">
-            <div style="font-size:22px">🎧</div>
-            <div style="font-size:11px;font-weight:500;margin-top:4px">Audiobook</div>
-          </div>
-          <div class="format-btn" onclick="setFormat(this,'fanfic')" data-format="fanfic">
-            <div style="font-size:22px">✍️</div>
-            <div style="font-size:11px;font-weight:500;margin-top:4px">Fanfic</div>
-          </div>
-        </div>
-      </div>
 
-      <div class="field-group" id="fanficLinkGroup" style="display:none">
-        <label class="field-label">Fanfic Link 🔗</label>
-        <input class="field-input" id="inputFanficLink" placeholder="Paste AO3, Wattpad or any URL..." type="url" />
-      </div>
       <div class="field-group">
         <label class="field-label">Humor Rating 👑</label>
         <div class="spicy-rating-input" id="humorInput">
@@ -997,6 +971,32 @@
           <button class="extra-btn" onclick="setFluff(5)">🩷</button>
         </div>
         <div class="spicy-label-row"><div class="spicy-desc" id="fluffDesc">How fluffy was it? 🩷</div></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Format</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="format-btn active" onclick="setFormat(this,'physical')" data-format="physical">
+            <div style="font-size:22px">📚</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Physical</div>
+          </div>
+          <div class="format-btn" onclick="setFormat(this,'ebook')" data-format="ebook">
+            <div style="font-size:22px">📱</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">eBook</div>
+          </div>
+          <div class="format-btn" onclick="setFormat(this,'audio')" data-format="audio">
+            <div style="font-size:22px">🎧</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Audiobook</div>
+          </div>
+          <div class="format-btn" onclick="setFormat(this,'fanfic')" data-format="fanfic">
+            <div style="font-size:22px">✍️</div>
+            <div style="font-size:11px;font-weight:500;margin-top:4px">Fanfic</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group" id="fanficLinkGroup" style="display:none">
+        <label class="field-label">Fanfic Link 🔗</label>
+        <input class="field-input" id="inputFanficLink" placeholder="Paste AO3, Wattpad or any URL..." type="url" />
       </div>
       <div class="field-group">
         <label class="field-label">Would you read it again?</label>
@@ -1164,7 +1164,7 @@ const TROPES_MAP = {
   'friends-to-lovers':'Friends to Lovers','forced-proximity':'Forced Proximity','grumpy-sunshine':'Grumpy × Sunshine',
   'slow-burn':'Slow Burn','why-choose':'Why Choose','forbidden':'Forbidden Love','instalove':'Instalove',
   'boss-employee':'Boss × Employee','age-gap':'Age Gap','single-parent':'Single Parent',
-  'sports-romance':'Sports Romance','small-town':'Small Town','vacation-romance':'Vacation Romance','opposites-attract':'Opposites Attract','arranged-marriage':'Arranged Marriage','strangers-to-lovers':'Strangers to Lovers','pregnancy':'Pregnancy'
+  'sports-romance':'Sports Romance','small-town':'Small Town','vacation-romance':'Vacation Romance','opposites-attract':'Opposites Attract','arranged-marriage':'Arranged Marriage','strangers-to-lovers':'Strangers to Lovers','pregnancy':'Pregnancy','only-one-bed':'Only One Bed','soul-mates':'Soul Mates','workplace-romance':'Workplace Romance','best-friends-brother':'Best Friend\'s Brother','best-friends-sister':'Best Friend\'s Sister'
 };
 
 const SPINE_COLORS = [
@@ -1466,7 +1466,7 @@ function renderShelf() {
   }
   empty.style.display='none';
 
-  const chunkSize=12;
+  const chunkSize=10;
   const rows=[];
   for(let i=0;i<yearBooks.length;i+=chunkSize) rows.push(yearBooks.slice(i,i+chunkSize));
 
@@ -1575,6 +1575,7 @@ function renderWrapped() {
   document.getElementById('wrappedCount').textContent = booksOnly.length;
   document.getElementById('wrappedFanficCount').textContent = fanfics.length;
 
+  // Ratings and spice count fanfics too
   const rated=yearBooks.filter(b=>b.rating>0);
   const avg=rated.length?(rated.reduce((a,b)=>a+b.rating,0)/rated.length).toFixed(1):'—';
   document.getElementById('wrappedAvg').textContent=avg!=='—'?'⭐'+avg:'—';
@@ -1587,18 +1588,18 @@ function renderWrapped() {
   const genres=new Set(yearBooks.map(b=>b.genre).filter(Boolean));
   document.getElementById('wrappedGenres').textContent=genres.size;
 
-  // Goal
+  // Goal counts books + fanfics together
   const goal = loadGoal(wrappedYear);
   const goalInput = document.getElementById('goalInput');
   goalInput.value = goal || '';
-  const totalRead = booksOnly.length;
+  const totalRead = yearBooks.length;
   if (goal > 0) {
     document.getElementById('goalBarWrap').style.display='block';
     document.getElementById('goalEmpty').style.display='none';
     const pct = Math.min(Math.round(totalRead/goal*100), 100);
     document.getElementById('goalBar').style.width = pct+'%';
     document.getElementById('goalPct').textContent = pct+'%';
-    document.getElementById('goalProgressText').textContent = totalRead+' of '+goal+' books';
+    document.getElementById('goalProgressText').textContent = totalRead+' of '+goal+' read';
   } else {
     document.getElementById('goalBarWrap').style.display='none';
     document.getElementById('goalEmpty').style.display='block';
