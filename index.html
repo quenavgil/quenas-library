@@ -442,6 +442,7 @@
     justify-content: center;
   }
   .modal-overlay.open { display: flex; }
+  body.modal-open { overflow: hidden; position: fixed; width: 100%; }
   .modal {
     background: var(--cream);
     border-radius: 24px 24px 0 0;
@@ -1730,11 +1731,11 @@ function openAddModal() {
   document.getElementById('coverFileInput').value='';
 
   const m = document.getElementById('addModal');
-  m.classList.add('open');
+  m.classList.add('open'); document.body.classList.add('modal-open');
   const mb = m.querySelector('.modal-body');
   if(mb) mb.scrollTop = 0;
 }
-function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); document.body.classList.remove('modal-open'); }
 
 function setRating(n) {
   currentRating=n;
@@ -1907,7 +1908,7 @@ function openEditModal(idx) {
     document.getElementById('coverUploadPrompt').style.display='block';
     document.getElementById('coverChangeBtn').style.display='none';
   }
-  document.getElementById('detailModal').classList.remove('open');
+  document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open');
   const editModal = document.getElementById('addModal');
   editModal.classList.add('open');
   const editBody = editModal.querySelector('.modal-body');
@@ -1929,10 +1930,10 @@ function openRereadModal(idx){
   document.querySelectorAll('#rereadChiliInput .chili-btn').forEach(c=>c.classList.remove('lit'));
   document.getElementById('rereadStarDesc').textContent='Tap to rate';
   document.getElementById('rereadSpicyDesc').textContent='Tap to rate the heat';
-  document.getElementById('detailModal').classList.remove('open');
-  document.getElementById('rereadModal').classList.add('open');
+  document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open');
+  document.getElementById('rereadModal').classList.add('open'); document.body.classList.add('modal-open');
 }
-function closeRereadModal(){ document.getElementById('rereadModal').classList.remove('open'); }
+function closeRereadModal(){ document.getElementById('rereadModal').classList.remove('open'); document.body.classList.remove('modal-open'); }
 
 function setRereadRating(n){
   currentRereadRating=n;
@@ -2062,7 +2063,7 @@ function openDetail(idx) {
     }).join('');
   } else { rereadsWrap.style.display='none'; }
 
-  document.getElementById('detailModal').classList.add('open');
+  document.getElementById('detailModal').classList.add('open'); document.body.classList.add('modal-open');
 }
 
 async function deleteBook(idx) {
@@ -2071,12 +2072,12 @@ async function deleteBook(idx) {
   books.splice(idx,1);
   await deleteBookFromDB(bookId);
   await saveBooks();
-  document.getElementById('detailModal').classList.remove('open');
+  document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open');
   renderAll();
 }
 
 document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
-document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)document.getElementById('detailModal').classList.remove('open');});
+document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open');});
 document.getElementById('rereadModal').addEventListener('click',function(e){if(e.target===this)closeRereadModal();});
 
 function exportBooks() {
@@ -2138,7 +2139,7 @@ document.getElementById('addBookBtn').addEventListener('click', function(e) {
 });
 document.getElementById('backupBtn').addEventListener('click', function(e) {
   e.stopPropagation();
-  document.getElementById('backupModal').classList.add('open');
+  document.getElementById('backupModal').classList.add('open'); document.body.classList.add('modal-open');
 });
 document.getElementById('backupModal').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
 </script>
