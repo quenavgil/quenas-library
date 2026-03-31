@@ -1793,6 +1793,14 @@ function openAddModal() {
   currentFormat='physical';
   document.querySelectorAll('.format-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('fanficLinkGroup').style.display='none';
+  // Show progress group with physical defaults
+  document.getElementById('progressGroup').style.display='block';
+  document.getElementById('progressLabel').textContent='Current Page 📄';
+  document.getElementById('inputProgress').placeholder='What page are you on?';
+  document.getElementById('inputProgress').type='number';
+  document.getElementById('pagesLabel').textContent='Page Count 📄';
+  document.getElementById('inputPages').placeholder='Total pages';
+  document.getElementById('inputPages').type='number';
 
   // Tropes, couple type, genre — nothing selected
   selectedTropes=[];
