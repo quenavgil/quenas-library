@@ -33,7 +33,7 @@
     background: var(--cream);
     color: var(--text);
     min-height: 100vh;
-    max-width: 430px;
+    max-width: 900px;
     margin: 0 auto;
     overflow-x: hidden;
   }
@@ -585,6 +585,23 @@
   .reread-dates { font-size:12px; color:var(--sage); margin-bottom:4px; }
   .reread-ratings { display:flex; gap:12px; font-size:13px; }
 
+
+  @media (min-width: 600px) {
+    #bookGrid {
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 14px !important;
+    }
+    .modal { max-width: 540px; }
+    .top-bar { padding: 20px 32px; }
+    .tabs { padding: 16px 24px 0; }
+    .section { padding: 20px 24px; }
+    .stats-strip { gap: 0; }
+  }
+  @media (min-width: 800px) {
+    #bookGrid {
+      grid-template-columns: repeat(5, 1fr) !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1047,7 +1064,7 @@
       <div class="detail-dates" id="detailDates"></div>
       <div id="detailFormat" style="margin-bottom:6px;font-size:13px;color:var(--muted)"></div>
       <div id="detailFanficLinkWrap" style="display:none;margin-bottom:12px">
-        <a id="detailFanficLink" href="#" target="_blank" style="font-size:13px;color:var(--rose);font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:5px">🔗 Open Fanfic</a>
+        <a id="detailFanficLink" href="#" onclick="if(this.dataset.url){window.open(this.dataset.url,'_blank');return false;}" style="font-size:13px;color:var(--rose);font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:5px">🔗 Open Fanfic</a>
       </div>
       <div class="detail-ratings-row">
         <div>
@@ -1985,7 +2002,7 @@ function openDetail(idx) {
   const fanficLinkWrap=document.getElementById('detailFanficLinkWrap');
   if(b.fanficLink){
     fanficLinkWrap.style.display='block';
-    document.getElementById('detailFanficLink').href=b.fanficLink;
+    document.getElementById('detailFanficLink').href=b.fanficLink; document.getElementById('detailFanficLink').dataset.url=b.fanficLink;
   } else { fanficLinkWrap.style.display='none'; }
 
   // Read again + series
