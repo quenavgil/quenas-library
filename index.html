@@ -1468,8 +1468,26 @@ function renderBooks() {
     const isReading = b.dateStart && !b.dateEnd;
     const spicyBadge = !isReading && b.spicy ? `<div class="spicy-badge">${'🔥'.repeat(b.spicy)}</div>` : '';
     const ratingBadge = !isReading && b.rating ? `<div class="rating-badge">${b.rating}★</div>` : '';
+    // Calculate reading progress
+    var progressPct = '';
+    if (isReading && b.progress && b.pages) {
+      if (b.format === 'audio') {
+        // Parse HH:MM:SS or MM:SS for audiobooks
+        var parseTime = function(t) {
+          var parts = String(t).split(':').map(Number);
+          if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+          if (parts.length === 2) return parts[0]*60 + parts[1];
+          return parseFloat(t) || 0;
+        };
+        var pct = Math.min(Math.round(parseTime(b.progress)/parseTime(b.pages)*100), 100);
+        if (!isNaN(pct) && pct > 0) progressPct = pct + '%';
+      } else {
+        var pct = Math.min(Math.round(parseFloat(b.progress)/parseFloat(b.pages)*100), 100);
+        if (!isNaN(pct) && pct > 0) progressPct = pct + '%';
+      }
+    }
     const bottomInfo = isReading
-      ? `<div class="reading-now-pill">📖 currently reading</div>`
+      ? \`<div class="reading-now-pill">📖 \${progressPct ? progressPct + ' · ' : ''}reading</div>\`
       : `<div class="stars-small">${renderStars(b.rating)}</div>${trope?`<div class="trope-pill-small">${trope}</div>`:''}`;
     return `
     <div class="book-card" onclick="openDetail(${realIdx})">
