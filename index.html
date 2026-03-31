@@ -1085,7 +1085,11 @@
       </div>
       <div class="field-group">
         <label class="field-label" id="pagesLabel">Page Count 📄</label>
-        <input class="field-input" id="inputPages" type="number" placeholder="How many pages?" min="1" />
+        <input class="field-input" id="inputPages" type="text" placeholder="How many pages?" />
+        <div id="progressGroup" style="margin-top:8px;display:none">
+          <label class="field-label" id="progressLabel" style="margin-top:0">Current Progress</label>
+          <input class="field-input" id="inputProgress" type="text" placeholder="Where are you now?" />
+        </div>
       </div>
       <div class="field-group">
         <label class="field-label">Did Not Finish?</label>
@@ -1158,6 +1162,12 @@
       <div style="display:flex;gap:10px;margin-top:16px">
         <button class="edit-btn" id="detailEditBtn">&#9999;&#65039; Edit</button>
         <button class="reread-btn" id="detailRereadBtn">&#128257; Re-read</button>
+      </div>
+      <div id="detailProgressWrap" style="display:none;margin-top:8px;margin-bottom:8px">
+        <div id="detailProgressBar" style="background:var(--border);border-radius:20px;height:8px;margin-bottom:4px;overflow:hidden">
+          <div id="detailProgressFill" style="background:var(--plum);height:100%;border-radius:20px;transition:width 0.3s;width:0%"></div>
+        </div>
+        <div id="detailProgressText" style="font-size:11px;color:var(--muted);text-align:center"></div>
       </div>
       <div id="detailNotesWrap" style="display:none;margin-top:12px">
         <div class="detail-section-label">Notes 💬</div>
@@ -1751,6 +1761,7 @@ function openAddModal() {
   document.getElementById('inputSeriesName').value='';
   document.getElementById('inputNotes').value='';
   document.getElementById('inputPages').value='';
+  document.getElementById('inputProgress').value='';
   currentIsDNF=false;
   if(document.getElementById('dnfBtn')) document.getElementById('dnfBtn').classList.remove('selected');
   document.getElementById('inputFanficLink').value='';
@@ -1863,18 +1874,41 @@ function setFormat(el, fmt) {
   // Update length field based on format
   var pagesLabel = document.getElementById('pagesLabel');
   var pagesInput = document.getElementById('inputPages');
+  var progressGroup = document.getElementById('progressGroup');
+  var progressLabel = document.getElementById('progressLabel');
+  var progressInput = document.getElementById('inputProgress');
   if (fmt === 'fanfic') {
-    pagesLabel.textContent = 'Chapter Count 📖';
-    pagesInput.placeholder = 'How many chapters?';
+    pagesLabel.textContent = 'Total Chapters 📖';
+    pagesInput.placeholder = 'Total number of chapters';
+    progressGroup.style.display = 'block';
+    progressLabel.textContent = 'Current Chapter';
+    progressInput.placeholder = 'Which chapter are you on?';
+    pagesInput.type = 'number';
+    progressInput.type = 'number';
   } else if (fmt === 'audio') {
-    pagesLabel.textContent = 'Duration ⏱️';
-    pagesInput.placeholder = 'Length in minutes';
+    pagesLabel.textContent = 'Total Duration ⏱️';
+    pagesInput.placeholder = 'e.g. 10:32:45';
+    pagesInput.type = 'text';
+    progressGroup.style.display = 'block';
+    progressLabel.textContent = 'Current Position ⏱️';
+    progressInput.placeholder = 'e.g. 4:15:30';
+    progressInput.type = 'text';
   } else if (fmt === 'ebook') {
-    pagesLabel.textContent = 'Length 📱';
-    pagesInput.placeholder = 'Pages, locations, or % — your choice';
+    pagesLabel.textContent = 'Total Length 📱';
+    pagesInput.placeholder = 'Pages, locations, or %';
+    pagesInput.type = 'text';
+    progressGroup.style.display = 'block';
+    progressLabel.textContent = 'Current Position 📱';
+    progressInput.placeholder = 'Page, location, or % you are on';
+    progressInput.type = 'text';
   } else {
     pagesLabel.textContent = 'Page Count 📄';
-    pagesInput.placeholder = 'How many pages?';
+    pagesInput.placeholder = 'Total pages';
+    pagesInput.type = 'number';
+    progressGroup.style.display = 'block';
+    progressLabel.textContent = 'Current Page 📄';
+    progressInput.placeholder = 'What page are you on?';
+    progressInput.type = 'number';
   }
 }
 
@@ -1924,7 +1958,8 @@ async function saveBook() {
     seriesType:currentSeriesType||null,
     seriesName:document.getElementById('inputSeriesName').value.trim()||null,
     notes:document.getElementById('inputNotes').value.trim()||null,
-    pages:parseInt(document.getElementById('inputPages').value)||null,
+    pages:document.getElementById('inputPages').value.trim()||null,
+    progress:document.getElementById('inputProgress').value.trim()||null,
     isDNF:currentIsDNF||false,
   };
   if(editingIdx>=0){
@@ -1985,6 +2020,7 @@ function openEditModal(idx) {
   document.getElementById('inputSeriesName').value=b.seriesName||'';
   document.getElementById('inputNotes').value=b.notes||'';
   document.getElementById('inputPages').value=b.pages||'';
+  document.getElementById('inputProgress').value=b.progress||'';
   currentIsDNF=b.isDNF||false;
   document.getElementById('dnfBtn').classList.toggle('selected', currentIsDNF);
   document.querySelectorAll('.format-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.format===currentFormat));
@@ -1992,10 +2028,12 @@ function openEditModal(idx) {
   var pLabel = document.getElementById('pagesLabel');
   var pInput = document.getElementById('inputPages');
   if (pLabel && pInput) {
-    if (currentFormat==='fanfic') { pLabel.textContent='Chapter Count 📖'; pInput.placeholder='How many chapters?'; }
-    else if (currentFormat==='audio') { pLabel.textContent='Duration ⏱️'; pInput.placeholder='Length in minutes'; }
-    else if (currentFormat==='ebook') { pLabel.textContent='Length 📱'; pInput.placeholder='Pages, locations, or % — your choice'; }
-    else { pLabel.textContent='Page Count 📄'; pInput.placeholder='How many pages?'; }
+    var pg = document.getElementById('progressGroup');
+    var prgLabel = document.getElementById('progressLabel');
+    if (currentFormat==='fanfic') { pLabel.textContent='Total Chapters 📖'; pInput.placeholder='Total chapters'; if(pg){pg.style.display='block';prgLabel.textContent='Current Chapter';} }
+    else if (currentFormat==='audio') { pLabel.textContent='Total Duration ⏱️'; pInput.placeholder='e.g. 10:32:45'; if(pg){pg.style.display='block';prgLabel.textContent='Current Position ⏱️';} }
+    else if (currentFormat==='ebook') { pLabel.textContent='Total Length 📱'; pInput.placeholder='Pages, locations, or %'; if(pg){pg.style.display='block';prgLabel.textContent='Current Position 📱';} }
+    else { pLabel.textContent='Page Count 📄'; pInput.placeholder='Total pages'; if(pg){pg.style.display='block';prgLabel.textContent='Current Page 📄';} }
   }
   currentCoverDataURL=b.coverImage||null;
   if(b.coverImage){
@@ -2146,6 +2184,28 @@ function openDetail(idx) {
     :'<span style="font-size:13px;color:var(--muted)">No tropes logged</span>';
 
   document.getElementById('detailDeleteBtn').onclick=()=>deleteBook(idx);
+  // Progress bar
+  var progressWrap = document.getElementById('detailProgressWrap');
+  if (b.progress && b.pages && b.format !== 'audio' && b.format !== 'fanfic') {
+    var pct = Math.min(Math.round(parseFloat(b.progress)/parseFloat(b.pages)*100), 100);
+    if (!isNaN(pct)) {
+      progressWrap.style.display='block';
+      document.getElementById('detailProgressFill').style.width = pct+'%';
+      document.getElementById('detailProgressText').textContent = b.progress + ' of ' + b.pages + ' (' + pct + '%)';
+    } else { progressWrap.style.display='none'; }
+  } else if (b.progress && b.pages && b.format === 'fanfic') {
+    var pct = Math.min(Math.round(parseInt(b.progress)/parseInt(b.pages)*100), 100);
+    if (!isNaN(pct)) {
+      progressWrap.style.display='block';
+      document.getElementById('detailProgressFill').style.width = pct+'%';
+      document.getElementById('detailProgressText').textContent = 'Chapter ' + b.progress + ' of ' + b.pages + ' (' + pct + '%)';
+    } else { progressWrap.style.display='none'; }
+  } else if (b.progress) {
+    progressWrap.style.display='block';
+    document.getElementById('detailProgressFill').style.width = '0%';
+    document.getElementById('detailProgressText').textContent = b.format==='audio' ? '⏱️ At ' + b.progress + (b.pages ? ' of ' + b.pages : '') : b.progress + (b.pages ? ' of ' + b.pages : '');
+  } else { progressWrap.style.display='none'; }
+
   // Notes
   const notesWrap=document.getElementById('detailNotesWrap');
   if(b.notes){notesWrap.style.display='block';document.getElementById('detailNotes').textContent=b.notes;}
