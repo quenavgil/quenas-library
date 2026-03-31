@@ -1484,7 +1484,6 @@ function renderBooks() {
     var progressPct = '';
     if (isReading && b.progress && b.pages) {
       if (b.format === 'audio') {
-        // Parse HH:MM:SS or MM:SS for audiobooks
         var parseTime = function(t) {
           var parts = String(t).split(':').map(Number);
           if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
@@ -1496,6 +1495,15 @@ function renderBooks() {
       } else {
         var pct = Math.min(Math.round(parseFloat(b.progress)/parseFloat(b.pages)*100), 100);
         if (!isNaN(pct) && pct > 0) progressPct = pct + '%';
+      }
+    } else if (isReading && b.progress && !b.pages) {
+      // No total set — show current position only
+      if (b.format === 'fanfic') {
+        progressPct = 'Ch. ' + b.progress;
+      } else if (b.format === 'audio') {
+        progressPct = '⏱️ ' + b.progress;
+      } else {
+        progressPct = 'p. ' + b.progress;
       }
     }
     const progressBadge = isReading && progressPct ? `<div class="progress-badge">${progressPct}</div>` : '';
