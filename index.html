@@ -602,6 +602,16 @@
       grid-template-columns: repeat(5, 1fr) !important;
     }
   }
+
+  @media (min-width: 600px) {
+    .shelf-book-spine { width: 52px !important; }
+    .shelf-spine-title { font-size: 8px !important; }
+    .shelf-books { gap: 6px !important; min-height: 200px !important; }
+    .shelf-plank { height: 18px !important; }
+  }
+  @media (min-width: 800px) {
+    .shelf-book-spine { width: 64px !important; }
+  }
 </style>
 </head>
 <body>
@@ -1483,7 +1493,7 @@ function renderShelf() {
   }
   empty.style.display='none';
 
-  const chunkSize=10;
+  const chunkSize = window.innerWidth >= 800 ? 10 : window.innerWidth >= 600 ? 10 : 10;
   const rows=[];
   for(let i=0;i<yearBooks.length;i+=chunkSize) rows.push(yearBooks.slice(i,i+chunkSize));
 
