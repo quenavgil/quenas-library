@@ -195,6 +195,18 @@
     line-height: 1.3;
   }
   .cover-emoji { font-size: 28px; margin-bottom: 6px; }
+  .progress-badge {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    background: var(--plum);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+  }
   .rating-badge {
     position: absolute;
     top: 6px; right: 6px;
@@ -1467,6 +1479,7 @@ function renderBooks() {
       :`<div class="book-cover-placeholder" style="background:${getBookGradient(realIdx)}"><div class="cover-emoji">${emoji}</div><div style="font-size:10px;color:rgba(255,255,255,0.9);line-height:1.3;padding:0 4px">${b.title}</div></div>`;
     const isReading = b.dateStart && !b.dateEnd;
     const spicyBadge = !isReading && b.spicy ? `<div class="spicy-badge">${'🔥'.repeat(b.spicy)}</div>` : '';
+    const progressBadge = isReading && progressPct ? `<div class="progress-badge">${progressPct}</div>` : '';
     const ratingBadge = !isReading && b.rating ? `<div class="rating-badge">${b.rating}★</div>` : '';
     // Calculate reading progress
     var progressPct = '';
@@ -1487,11 +1500,11 @@ function renderBooks() {
       }
     }
     const bottomInfo = isReading
-      ? \`<div class="reading-now-pill">📖 \${progressPct ? progressPct + ' · ' : ''}reading</div>\`
+      ? `<div class="reading-now-pill">📖 currently reading</div>`
       : `<div class="stars-small">${renderStars(b.rating)}</div>${trope?`<div class="trope-pill-small">${trope}</div>`:''}`;
     return `
     <div class="book-card" onclick="openDetail(${realIdx})">
-      <div class="book-cover-wrap">${coverHTML}${ratingBadge}${spicyBadge}</div>
+      <div class="book-cover-wrap">${coverHTML}${ratingBadge}${spicyBadge}${progressBadge}</div>
       <div class="book-info">
         <div class="book-title-card">${b.title}</div>
         <div class="book-author-card">${b.author||''}</div>
