@@ -1319,7 +1319,7 @@ async function saveBooks() {
   // Save to Supabase (cloud) — primary storage
   try {
     // Upsert all books
-    const payload = books.map(b => ({ id: b.id, data: b }));
+    const payload = books.map(b => ({ id: String(b.id), data: b }));
     await fetch(SUPABASE_URL + '/rest/v1/books', {
       method: 'POST',
       headers: {
