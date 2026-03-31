@@ -613,6 +613,26 @@
   @media (min-width: 800px) {
     .shelf-book-spine { width: 64px !important; }
   }
+
+  body.dark-mode {
+    --cream: #1A1A2E;
+    --blush: #2D2D44;
+    --rose: #C2607A;
+    --deep: #E8D5F0;
+    --plum: #9B8EC4;
+    --gold: #E8B4C8;
+    --sage: #7B8EC8;
+    --text: #E8D5F0;
+    --muted: #9B8BAE;
+    --card: #16213E;
+    --border: #2D2D44;
+    --chili: #E05C5C;
+    background: #1A1A2E;
+  }
+  body.dark-mode .top-bar { background: #0F0F23; }
+  body.dark-mode .tabs { background: #16213E; border-bottom-color: #2D2D44; }
+  body.dark-mode .stats-strip { background: #0F0F23; }
+
 </style>
 </head>
 <body>
@@ -655,6 +675,7 @@
   <div class="tab" onclick="switchTab('shelf')">🪵 Shelf</div>
   <div class="tab" onclick="switchTab('couples')">💕 Couples</div>
   <div class="tab" onclick="switchTab('wrapped')">✨ Wrapped</div>
+  <div class="tab" onclick="switchTab('tbr')">🔖 TBR</div>
 </div>
 
 <!-- LIBRARY TAB -->
@@ -664,6 +685,7 @@
     <div class="filter-chip active" onclick="filterBooks('all', this)">All</div>
     <div class="filter-chip" onclick="filterBooks('5', this)">⭐ 5 Stars</div>
     <div class="filter-chip" onclick="filterBooks('spicy5', this)">🔥🔥🔥 Max Spice</div>
+    <div class="filter-chip" onclick="filterBooks('dnf', this)">🚫 DNF</div>
   </div>
   <div class="book-grid" id="bookGrid"></div>
   <div class="empty-state" id="emptyState">
@@ -1057,6 +1079,18 @@
         </div>
         <input class="field-input" id="inputSeriesName" placeholder="Series name (optional)" style="margin-top:10px;display:none" />
       </div>
+      <div class="field-group">
+        <label class="field-label">Notes / Quotes 💬</label>
+        <textarea class="field-input" id="inputNotes" placeholder="Your thoughts, favorite quotes..." rows="3" style="resize:none;font-family:inherit;line-height:1.5"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label" id="pagesLabel">Page Count 📄</label>
+        <input class="field-input" id="inputPages" type="number" placeholder="How many pages?" min="1" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Did Not Finish?</label>
+        <div id="dnfBtn" class="trope-option" onclick="currentIsDNF=!currentIsDNF;this.classList.toggle('selected')" style="display:inline-block;padding:8px 16px">🚫 DNF — Did Not Finish</div>
+      </div>
       <button class="save-btn" id="saveBookBtn" onclick="saveBook()">Save to My Shelf ✨</button>
     </div>
   </div>
@@ -1124,6 +1158,13 @@
       <div style="display:flex;gap:10px;margin-top:16px">
         <button class="edit-btn" id="detailEditBtn">&#9999;&#65039; Edit</button>
         <button class="reread-btn" id="detailRereadBtn">&#128257; Re-read</button>
+      </div>
+      <div id="detailNotesWrap" style="display:none;margin-top:12px">
+        <div class="detail-section-label">Notes 💬</div>
+        <div id="detailNotes" style="font-size:13px;color:var(--text);line-height:1.6;white-space:pre-wrap;background:var(--border);border-radius:10px;padding:10px 12px"></div>
+      </div>
+      <div id="detailDNFWrap" style="display:none;margin-top:8px">
+        <span style="background:#E05C5C;color:white;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600">🚫 DNF — Did Not Finish</span>
       </div>
       <button class="delete-btn" id="detailDeleteBtn" style="margin-top:10px">Remove from Shelf</button>
     </div>
@@ -1639,7 +1680,30 @@ function renderWrapped() {
   const sorted=Object.entries(tCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const max=sorted.length?sorted[0][1]:1;
   const barsEl=document.getElementById('tropeChartBars');
-  if(!sorted.length){barsEl.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0;">No data for '+wrappedYear+' yet!</div>';return;}
+
+  // Monthly breakdown
+  var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var monthlyCounts = Array(12).fill(0);
+  yearBooks.forEach(function(b) {
+    var d = b.dateEnd || b.dateStart;
+    if (d) { var m = new Date(d).getMonth(); monthlyCounts[m]++; }
+  });
+  var maxMonthly = Math.max.apply(null, monthlyCounts) || 1;
+  var monthlyEl = document.getElementById('monthlyChart');
+  if (monthlyEl) {
+    monthlyEl.innerHTML = monthlyCounts.map(function(count, i) {
+      var pct = Math.round(count/maxMonthly*100);
+      return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">'
+        + '<div style="font-size:10px;color:var(--muted);font-weight:600">' + (count||'') + '</div>'
+        + '<div style="width:100%;background:var(--border);border-radius:4px;height:50px;display:flex;align-items:flex-end">'
+        + '<div style="width:100%;background:var(--plum);border-radius:4px;height:' + pct + '%;min-height:' + (count?4:0) + 'px;transition:height 0.3s"></div>'
+        + '</div>'
+        + '<div style="font-size:9px;color:var(--muted)">' + monthNames[i] + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+    if(!sorted.length){barsEl.innerHTML='<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px 0;">No data for '+wrappedYear+' yet!</div>';return;}
   barsEl.innerHTML=sorted.map(([k,v])=>`
     <div class="trope-bar-row">
       <div class="trope-bar-label">${TROPES_MAP[k]||k}</div>
@@ -1649,7 +1713,7 @@ function renderWrapped() {
 }
 
 function switchTab(name) {
-  const names=['library','shelf','couples','wrapped'];
+  const names=['library','shelf','couples','wrapped','tbr'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
@@ -1685,6 +1749,10 @@ function openAddModal() {
   document.getElementById('inputDateStart').value='';
   document.getElementById('inputDateEnd').value='';
   document.getElementById('inputSeriesName').value='';
+  document.getElementById('inputNotes').value='';
+  document.getElementById('inputPages').value='';
+  currentIsDNF=false;
+  if(document.getElementById('dnfBtn')) document.getElementById('dnfBtn').classList.remove('selected');
   document.getElementById('inputFanficLink').value='';
 
   // Ratings
@@ -1792,6 +1860,22 @@ function setFormat(el, fmt) {
   el.classList.add('active');
   document.getElementById('fanficLinkGroup').style.display = fmt==='fanfic' ? 'block' : 'none';
   if(fmt!=='fanfic') document.getElementById('inputFanficLink').value='';
+  // Update length field based on format
+  var pagesLabel = document.getElementById('pagesLabel');
+  var pagesInput = document.getElementById('inputPages');
+  if (fmt === 'fanfic') {
+    pagesLabel.textContent = 'Chapter Count 📖';
+    pagesInput.placeholder = 'How many chapters?';
+  } else if (fmt === 'audio') {
+    pagesLabel.textContent = 'Duration ⏱️';
+    pagesInput.placeholder = 'Length in minutes';
+  } else if (fmt === 'ebook') {
+    pagesLabel.textContent = 'Length 📱';
+    pagesInput.placeholder = 'Pages, locations, or % — your choice';
+  } else {
+    pagesLabel.textContent = 'Page Count 📄';
+    pagesInput.placeholder = 'How many pages?';
+  }
 }
 
 function toggleTrope(el,key) {
@@ -1839,6 +1923,9 @@ async function saveBook() {
     readAgain:currentReadAgain,
     seriesType:currentSeriesType||null,
     seriesName:document.getElementById('inputSeriesName').value.trim()||null,
+    notes:document.getElementById('inputNotes').value.trim()||null,
+    pages:parseInt(document.getElementById('inputPages').value)||null,
+    isDNF:currentIsDNF||false,
   };
   if(editingIdx>=0){
     const existing=books[editingIdx];
@@ -1896,7 +1983,20 @@ function openEditModal(idx) {
   currentReadAgain=b.readAgain; setReadAgain(b.readAgain);
   currentSeriesType=b.seriesType||null; if(b.seriesType) setSeriesType(b.seriesType);
   document.getElementById('inputSeriesName').value=b.seriesName||'';
+  document.getElementById('inputNotes').value=b.notes||'';
+  document.getElementById('inputPages').value=b.pages||'';
+  currentIsDNF=b.isDNF||false;
+  document.getElementById('dnfBtn').classList.toggle('selected', currentIsDNF);
   document.querySelectorAll('.format-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.format===currentFormat));
+  // Update length field label for current format
+  var pLabel = document.getElementById('pagesLabel');
+  var pInput = document.getElementById('inputPages');
+  if (pLabel && pInput) {
+    if (currentFormat==='fanfic') { pLabel.textContent='Chapter Count 📖'; pInput.placeholder='How many chapters?'; }
+    else if (currentFormat==='audio') { pLabel.textContent='Duration ⏱️'; pInput.placeholder='Length in minutes'; }
+    else if (currentFormat==='ebook') { pLabel.textContent='Length 📱'; pInput.placeholder='Pages, locations, or % — your choice'; }
+    else { pLabel.textContent='Page Count 📄'; pInput.placeholder='How many pages?'; }
+  }
   currentCoverDataURL=b.coverImage||null;
   if(b.coverImage){
     document.getElementById('coverPreview').src=b.coverImage;
@@ -2046,6 +2146,13 @@ function openDetail(idx) {
     :'<span style="font-size:13px;color:var(--muted)">No tropes logged</span>';
 
   document.getElementById('detailDeleteBtn').onclick=()=>deleteBook(idx);
+  // Notes
+  const notesWrap=document.getElementById('detailNotesWrap');
+  if(b.notes){notesWrap.style.display='block';document.getElementById('detailNotes').textContent=b.notes;}
+  else{notesWrap.style.display='none';}
+  // DNF
+  const dnfWrap=document.getElementById('detailDNFWrap');
+  if(b.isDNF){dnfWrap.style.display='block';}else{dnfWrap.style.display='none';}
   document.getElementById('detailEditBtn').onclick=()=>openEditModal(idx);
   document.getElementById('detailRereadBtn').onclick=()=>openRereadModal(idx);
 
@@ -2142,6 +2249,154 @@ document.getElementById('backupBtn').addEventListener('click', function(e) {
   document.getElementById('backupModal').classList.add('open'); document.body.classList.add('modal-open');
 });
 document.getElementById('backupModal').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
+
+// ── TBR ──
+let tbrBooks = [];
+let currentTBRPriority = 2;
+
+function loadTBR() {
+  try { tbrBooks = JSON.parse(localStorage.getItem('quena-tbr-v1') || '[]'); } catch(e) { tbrBooks = []; }
+}
+function saveTBR() {
+  try { localStorage.setItem('quena-tbr-v1', JSON.stringify(tbrBooks)); } catch(e) {}
+}
+function setTBRPriority(n) {
+  currentTBRPriority = n;
+  [1,2,3].forEach(function(i) {
+    document.getElementById('tbrP'+i).classList.toggle('selected', i===n);
+  });
+}
+function openAddTBRModal() {
+  document.getElementById('tbrTitle').value='';
+  document.getElementById('tbrAuthor').value='';
+  document.getElementById('tbrReason').value='';
+  setTBRPriority(2);
+  document.getElementById('tbrModal').classList.add('open');
+  document.body.classList.add('modal-open');
+}
+function closeTBRModal() {
+  document.getElementById('tbrModal').classList.remove('open');
+  document.body.classList.remove('modal-open');
+}
+function saveTBR() {
+  var title = document.getElementById('tbrTitle').value.trim();
+  if (!title) { document.getElementById('tbrTitle').focus(); return; }
+  tbrBooks.unshift({
+    id: Date.now(),
+    title: title,
+    author: document.getElementById('tbrAuthor').value.trim()||null,
+    reason: document.getElementById('tbrReason').value.trim()||null,
+    priority: currentTBRPriority,
+    added: new Date().toISOString()
+  });
+  saveTBR();
+  closeTBRModal();
+  renderTBR();
+}
+function removeTBR(id) {
+  if (!confirm('Remove from TBR?')) return;
+  tbrBooks = tbrBooks.filter(function(b){ return b.id !== id; });
+  saveTBR();
+  renderTBR();
+}
+function startReadingTBR(id) {
+  var b = tbrBooks.find(function(b){ return b.id === id; });
+  if (!b) return;
+  // Pre-fill the add book modal with TBR data
+  openAddModal();
+  document.getElementById('inputTitle').value = b.title || '';
+  document.getElementById('inputAuthor').value = b.author || '';
+}
+function renderTBR() {
+  var list = document.getElementById('tbrList');
+  var empty = document.getElementById('emptyTBR');
+  if (!tbrBooks.length) { list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  var priorityLabel = {1:'🔥 High', 2:'📖 Medium', 3:'💤 Low'};
+  var priorityColor = {1:'#E05C5C', 2:'var(--plum)', 3:'var(--muted)'};
+  list.innerHTML = tbrBooks.map(function(b) {
+    return '<div style="background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      + '<div style="flex:1">'
+      + '<div style="font-weight:700;font-size:15px;color:var(--deep);margin-bottom:2px">' + b.title + '</div>'
+      + (b.author ? '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">' + b.author + '</div>' : '')
+      + (b.reason ? '<div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px">📌 ' + b.reason + '</div>' : '')
+      + '<span style="font-size:11px;background:' + priorityColor[b.priority||2] + ';color:white;padding:2px 8px;border-radius:20px">' + (priorityLabel[b.priority||2]) + '</span>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px;margin-left:10px">'
+      + '<button onclick="startReadingTBR(' + b.id + ')" style="background:var(--plum);color:var(--cream);border:none;border-radius:10px;padding:5px 10px;font-size:11px;cursor:pointer;touch-action:manipulation;white-space:nowrap">▶ Start</button>'
+      + '<button onclick="removeTBR(' + b.id + ')" style="background:var(--border);color:var(--muted);border:none;border-radius:10px;padding:5px 10px;font-size:11px;cursor:pointer;touch-action:manipulation">✕ Remove</button>'
+      + '</div></div></div>';
+  }).join('');
+}
+loadTBR();
+renderTBR();
+
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  var isDark = document.body.classList.contains('dark-mode');
+  document.getElementById('darkModeBtn').textContent = isDark ? '☀️' : '🌙';
+  try { localStorage.setItem('quena-dark-mode', isDark ? '1' : '0'); } catch(e) {}
+}
+// Load dark mode preference
+try {
+  if (localStorage.getItem('quena-dark-mode') === '1') {
+    document.body.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.getElementById('darkModeBtn');
+      if (btn) btn.textContent = '☀️';
+    });
+  }
+} catch(e) {}
+
 </script>
+
+<!-- TBR TAB -->
+<div class="section" id="tab-tbr">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--deep)">To Be Read 🔖</div>
+    <button onclick="openAddTBRModal()" style="background:var(--deep);color:var(--cream);border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation">+</button>
+  </div>
+  <div id="tbrList"></div>
+  <div id="emptyTBR" style="display:none;text-align:center;padding:40px 20px">
+    <div style="font-size:40px;margin-bottom:12px">🔖</div>
+    <div class="empty-title">Your TBR is empty!</div>
+    <div class="empty-sub">Add books you want to read next.</div>
+  </div>
+</div>
+
+<!-- TBR ADD MODAL -->
+<div class="modal-overlay" id="tbrModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add to TBR 🔖</div>
+      <button class="modal-close" onclick="closeTBRModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0 20px 20px">
+      <div class="field-group">
+        <label class="field-label">Title *</label>
+        <input class="field-input" id="tbrTitle" placeholder="Book title" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Author</label>
+        <input class="field-input" id="tbrAuthor" placeholder="Author name" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Why you want to read it</label>
+        <input class="field-input" id="tbrReason" placeholder="Recommended by, saw on TikTok..." />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Priority</label>
+        <div style="display:flex;gap:8px">
+          <div class="trope-option" id="tbrP1" onclick="setTBRPriority(1)">🔥 High</div>
+          <div class="trope-option" id="tbrP2" onclick="setTBRPriority(2)">📖 Medium</div>
+          <div class="trope-option" id="tbrP3" onclick="setTBRPriority(3)">💤 Low</div>
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveTBR()">Add to TBR 🔖</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
