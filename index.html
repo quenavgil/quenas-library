@@ -1450,8 +1450,10 @@ function renderBooks() {
     });
   }
   if (currentFilter==='5') filtered=filtered.filter(b=>b.rating===5);
-  else if (currentFilter==='4') filtered=books.filter(b=>b.rating>=4);
-  else if (currentFilter==='spicy5') filtered=books.filter(b=>b.spicy===5);
+  else if (currentFilter==='4') filtered=filtered.filter(b=>b.rating>=4);
+  else if (currentFilter==='spicy5') filtered=filtered.filter(b=>b.spicy===5);
+  else if (currentFilter==='reading') filtered=filtered.filter(b=>b.dateStart && !b.dateEnd);
+  else if (currentFilter==='dnf') filtered=filtered.filter(b=>b.isDNF===true);
   else if (currentFilter!=='all') {
     const map={'enemies':'enemies-to-lovers','second-chance':'second-chance','fake':'fake-dating','friends':'friends-to-lovers','forced':'forced-proximity','grumpy':'grumpy-sunshine'};
     const key=map[currentFilter]||currentFilter;
