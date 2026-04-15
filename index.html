@@ -1292,7 +1292,7 @@ let currentGenre = '';
 
 async function loadBooks() {
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/books?select=*&order=created_at.asc', {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/books?select=*&order=created_at.asc&limit=1000', {
       headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + SUPABASE_KEY
@@ -1301,6 +1301,8 @@ async function loadBooks() {
     if (res.ok) {
       const rows = await res.json();
       books = rows.map(r => r.data);
+      // Update localStorage with fresh data from Supabase
+      try { localStorage.setItem('quena-books-v2', JSON.stringify(books)); } catch(e) {}
     } else {
       // Fallback to localStorage if Supabase fails
       const val = localStorage.getItem('quena-books-v2');
