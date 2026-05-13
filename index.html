@@ -1985,8 +1985,13 @@ function handleCoverUpload(event) {
 }
 
 async function saveBook() {
+  const btn = document.getElementById('saveBookBtn');
+  if (btn.disabled) return;
   const title=document.getElementById('inputTitle').value.trim();
   if(!title){document.getElementById('inputTitle').focus();return;}
+  // Disable button to prevent double taps
+  btn.disabled = true;
+  btn.textContent = 'Saving... ⏳';
   const emojiOptions=BOOK_EMOJIS;
   const bookData={
     title,
@@ -2020,7 +2025,13 @@ async function saveBook() {
   } else {
     books.unshift({id:Date.now(),...bookData,added:new Date().toISOString()});
   }
-  await saveBooks();
+  try {
+    await saveBooks();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = editingIdx >= 0 ? 'Save Changes ✨' : 'Save to My Shelf ✨';
+    return;
+  }
   closeAddModal();
   renderAll();
 }
@@ -2461,6 +2472,70 @@ try {
     });
   }
 } catch(e) {}
+
+
+// ── SWIPE TO GO BACK ──
+function addSwipeToClose(overlayId, closeFn) {
+  var overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  var modal = overlay.querySelector('.modal');
+  if (!modal) return;
+  var startX = 0, startY = 0, isDragging = false;
+
+  modal.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isDragging = false;
+  }, { passive: true });
+
+  modal.addEventListener('touchmove', function(e) {
+    var dx = e.touches[0].clientX - startX;
+    var dy = e.touches[0].clientY - startY;
+    // Only allow horizontal swipe (not vertical scroll)
+    if (Math.abs(dx) > Math.abs(dy) && dx > 10) {
+      isDragging = true;
+      var translateX = Math.max(0, dx);
+      modal.style.transform = 'translateX(' + translateX + 'px)';
+      modal.style.transition = 'none';
+    }
+  }, { passive: true });
+
+  modal.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - startX;
+    modal.style.transition = 'transform 0.3s ease';
+    if (isDragging && dx > 100) {
+      modal.style.transform = 'translateX(100%)';
+      setTimeout(function() {
+        closeFn();
+        modal.style.transform = '';
+        modal.style.transition = '';
+      }, 280);
+    } else {
+      modal.style.transform = '';
+    }
+    isDragging = false;
+  }, { passive: true });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  addSwipeToClose('detailModal', function() {
+    document.getElementById('detailModal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+  });
+  addSwipeToClose('addModal', function() {
+    closeAddModal();
+  });
+  addSwipeToClose('rereadModal', function() {
+    closeRereadModal();
+  });
+  addSwipeToClose('backupModal', function() {
+    document.getElementById('backupModal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+  });
+  addSwipeToClose('tbrModal', function() {
+    closeTBRModal();
+  });
+});
 
 </script>
 
