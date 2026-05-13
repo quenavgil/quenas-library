@@ -2474,71 +2474,61 @@ try {
 
 
 // ── SWIPE RIGHT TO CLOSE ──
-function addSwipeToClose(overlayId, closeFn) {
-  var overlay = document.getElementById(overlayId);
-  if (!overlay) return;
-  var modal = overlay.querySelector('.modal');
-  if (!modal) return;
-  var startX = 0, startY = 0, isDragging = false;
+(function() {
+  var swipeStartX = 0, swipeStartY = 0, swipeTarget = null, swipeClose = null;
 
-  overlay.addEventListener('touchstart', function(e) {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    isDragging = false;
+  var modals = [
+    { id: 'detailModal', fn: function() { document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open'); } },
+    { id: 'addModal', fn: function() { closeAddModal(); } },
+    { id: 'rereadModal', fn: function() { closeRereadModal(); } },
+    { id: 'backupModal', fn: function() { document.getElementById('backupModal').classList.remove('open'); document.body.classList.remove('modal-open'); } },
+    { id: 'tbrModal', fn: function() { closeTBRModal(); } }
+  ];
+
+  document.addEventListener('touchstart', function(e) {
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+    swipeTarget = null;
+    swipeClose = null;
+    for (var i = 0; i < modals.length; i++) {
+      var el = document.getElementById(modals[i].id);
+      if (el && el.classList.contains('open')) {
+        swipeTarget = el.querySelector('.modal');
+        swipeClose = modals[i].fn;
+        break;
+      }
+    }
   }, { passive: true });
 
-  overlay.addEventListener('touchmove', function(e) {
-    var dx = e.touches[0].clientX - startX;
-    var dy = e.touches[0].clientY - startY;
-    if (!isDragging && Math.abs(dx) > Math.abs(dy) && dx > 10) {
-      isDragging = true;
-    }
-    if (isDragging && dx > 0) {
-      modal.style.transform = 'translateX(' + dx + 'px)';
-      modal.style.transition = 'none';
-      modal.style.opacity = String(1 - dx/400);
+  document.addEventListener('touchmove', function(e) {
+    if (!swipeTarget) return;
+    var dx = e.touches[0].clientX - swipeStartX;
+    var dy = e.touches[0].clientY - swipeStartY;
+    if (dx > 0 && Math.abs(dx) > Math.abs(dy)) {
+      swipeTarget.style.transform = 'translateX(' + dx + 'px)';
+      swipeTarget.style.transition = 'none';
     }
   }, { passive: true });
 
-  overlay.addEventListener('touchend', function(e) {
-    var dx = e.changedTouches[0].clientX - startX;
-    modal.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-    if (isDragging && dx > 100) {
-      modal.style.transform = 'translateX(110%)';
-      modal.style.opacity = '0';
+  document.addEventListener('touchend', function(e) {
+    if (!swipeTarget) return;
+    var dx = e.changedTouches[0].clientX - swipeStartX;
+    swipeTarget.style.transition = 'transform 0.25s ease';
+    if (dx > 80) {
+      swipeTarget.style.transform = 'translateX(100vw)';
+      var fn = swipeClose;
+      var el = swipeTarget;
       setTimeout(function() {
-        closeFn();
-        modal.style.transform = '';
-        modal.style.opacity = '';
-        modal.style.transition = '';
+        fn();
+        el.style.transform = '';
+        el.style.transition = '';
       }, 250);
     } else {
-      modal.style.transform = '';
-      modal.style.opacity = '';
+      swipeTarget.style.transform = '';
     }
-    isDragging = false;
+    swipeTarget = null;
   }, { passive: true });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  addSwipeToClose('detailModal', function() {
-    document.getElementById('detailModal').classList.remove('open');
-    document.body.classList.remove('modal-open');
-  });
-  addSwipeToClose('addModal', function() {
-    closeAddModal();
-  });
-  addSwipeToClose('rereadModal', function() {
-    closeRereadModal();
-  });
-  addSwipeToClose('backupModal', function() {
-    document.getElementById('backupModal').classList.remove('open');
-    document.body.classList.remove('modal-open');
-  });
-  addSwipeToClose('tbrModal', function() {
-    closeTBRModal();
-  });
-});
+})();
 
 </script>
 
