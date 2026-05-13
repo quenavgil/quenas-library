@@ -26,7 +26,8 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   button, [onclick], .tab, .filter-chip, .book-card, .trope-option, .format-btn, .thumb-btn, .couple-book-item, .shelf-book-spine { touch-action: manipulation; cursor: pointer; }
-  html, body { overscroll-behavior: none; overflow-x: hidden; }
+  html, body { overscroll-behavior: none; overflow-x: hidden; touch-action: pan-y; }
+  html { overflow-x: hidden; }
 
   body {
     font-family: 'DM Sans', sans-serif;
@@ -447,6 +448,7 @@
     display: none;
     position: fixed;
     inset: 0;
+    overflow: hidden;
     background: rgba(30,15,25,0.6);
     z-index: 500;
     backdrop-filter: blur(4px);
@@ -465,6 +467,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
