@@ -463,7 +463,6 @@
     max-width: 430px;
     max-height: 94vh;
     overflow-y: auto;
-    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   }
@@ -2474,7 +2473,7 @@ try {
 } catch(e) {}
 
 
-// ── SWIPE TO GO BACK ──
+// ── SWIPE RIGHT TO CLOSE ──
 function addSwipeToClose(overlayId, closeFn) {
   var overlay = document.getElementById(overlayId);
   if (!overlay) return;
@@ -2482,36 +2481,40 @@ function addSwipeToClose(overlayId, closeFn) {
   if (!modal) return;
   var startX = 0, startY = 0, isDragging = false;
 
-  modal.addEventListener('touchstart', function(e) {
+  overlay.addEventListener('touchstart', function(e) {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     isDragging = false;
   }, { passive: true });
 
-  modal.addEventListener('touchmove', function(e) {
+  overlay.addEventListener('touchmove', function(e) {
     var dx = e.touches[0].clientX - startX;
     var dy = e.touches[0].clientY - startY;
-    // Only allow horizontal swipe (not vertical scroll)
-    if (Math.abs(dx) > Math.abs(dy) && dx > 10) {
+    if (!isDragging && Math.abs(dx) > Math.abs(dy) && dx > 10) {
       isDragging = true;
-      var translateX = Math.max(0, dx);
-      modal.style.transform = 'translateX(' + translateX + 'px)';
+    }
+    if (isDragging && dx > 0) {
+      modal.style.transform = 'translateX(' + dx + 'px)';
       modal.style.transition = 'none';
+      modal.style.opacity = String(1 - dx/400);
     }
   }, { passive: true });
 
-  modal.addEventListener('touchend', function(e) {
+  overlay.addEventListener('touchend', function(e) {
     var dx = e.changedTouches[0].clientX - startX;
-    modal.style.transition = 'transform 0.3s ease';
+    modal.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
     if (isDragging && dx > 100) {
-      modal.style.transform = 'translateX(100%)';
+      modal.style.transform = 'translateX(110%)';
+      modal.style.opacity = '0';
       setTimeout(function() {
         closeFn();
         modal.style.transform = '';
+        modal.style.opacity = '';
         modal.style.transition = '';
-      }, 280);
+      }, 250);
     } else {
       modal.style.transform = '';
+      modal.style.opacity = '';
     }
     isDragging = false;
   }, { passive: true });
