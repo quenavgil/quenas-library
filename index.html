@@ -2486,34 +2486,6 @@ try {
 
 
 
-function closeTopModal() {
-  var map = {
-    detailModal: function() { document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open'); },
-    addModal: function() { closeAddModal(); },
-    rereadModal: function() { closeRereadModal(); },
-    backupModal: function() { document.getElementById('backupModal').classList.remove('open'); document.body.classList.remove('modal-open'); },
-    tbrModal: function() { closeTBRModal(); }
-  };
-  for (var id in map) {
-    var el = document.getElementById(id);
-    if (el && el.classList.contains('open')) { map[id](); break; }
-  }
-  updateFloatingBack();
-}
-
-function updateFloatingBack() {
-  var ids = ['detailModal','addModal','rereadModal','backupModal','tbrModal'];
-  var anyOpen = ids.some(function(id) {
-    var el = document.getElementById(id);
-    return el && el.classList.contains('open');
-  });
-  document.getElementById('floatingBack').style.display = anyOpen ? 'block' : 'none';
-}
-
-// Patch all modal open/close to update floating button
-var _origOpen = HTMLElement.prototype.classList.add;
-setInterval(updateFloatingBack, 300);
-
 </script>
 
 <!-- TBR TAB -->
