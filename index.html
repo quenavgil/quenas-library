@@ -449,6 +449,7 @@
     position: fixed;
     inset: 0;
     overflow: hidden;
+    pointer-events: all;
     background: rgba(30,15,25,0.6);
     z-index: 500;
     backdrop-filter: blur(4px);
@@ -456,7 +457,7 @@
     justify-content: center;
   }
   .modal-overlay.open { display: flex; }
-  body.modal-open { overflow: hidden; position: fixed; width: 100%; }
+  body.modal-open { overflow: hidden; }
   .modal {
     background: var(--cream);
     border-radius: 24px 24px 0 0;
@@ -1327,20 +1328,21 @@ async function loadBooks() {
 
 async function saveBooks() {
   // Save to Supabase (cloud) — primary storage
-  try {
-    // Upsert all books
-    const payload = books.map(b => ({ id: String(b.id), data: b }));
-    await fetch(SUPABASE_URL + '/rest/v1/books', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
-      },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) {}
+  const payload = books.map(b => ({ id: String(b.id), data: b }));
+  const res = await fetch(SUPABASE_URL + '/rest/v1/books', {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Supabase error: ' + res.status + ' ' + err);
+  }
   // Also keep localStorage as backup
   try { localStorage.setItem('quena-books-v2', JSON.stringify(books)); } catch(e) {}
 }
@@ -2034,13 +2036,13 @@ async function saveBook() {
   }
   try {
     await saveBooks();
+    closeAddModal();
+    renderAll();
   } catch(e) {
     btn.disabled = false;
     btn.textContent = editingIdx >= 0 ? 'Save Changes ✨' : 'Save to My Shelf ✨';
-    return;
+    alert('Could not save. Please check your connection and try again.');
   }
-  closeAddModal();
-  renderAll();
 }
 
 
@@ -2387,7 +2389,7 @@ let currentTBRPriority = 2;
 function loadTBR() {
   try { tbrBooks = JSON.parse(localStorage.getItem('quena-tbr-v1') || '[]'); } catch(e) { tbrBooks = []; }
 }
-function saveTBR() {
+function persistTBR() {
   try { localStorage.setItem('quena-tbr-v1', JSON.stringify(tbrBooks)); } catch(e) {}
 }
 function setTBRPriority(n) {
@@ -2419,14 +2421,14 @@ function saveTBR() {
     priority: currentTBRPriority,
     added: new Date().toISOString()
   });
-  saveTBR();
+  persistTBR();
   closeTBRModal();
   renderTBR();
 }
 function removeTBR(id) {
   if (!confirm('Remove from TBR?')) return;
   tbrBooks = tbrBooks.filter(function(b){ return b.id !== id; });
-  saveTBR();
+  persistTBR();
   renderTBR();
 }
 function startReadingTBR(id) {
