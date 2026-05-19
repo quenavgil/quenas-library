@@ -457,7 +457,7 @@
     justify-content: center;
   }
   .modal-overlay.open { display: flex; }
-  body.modal-open { overflow: hidden; }
+  body.modal-open { overflow: hidden; height: 100%; }
   .modal {
     background: var(--cream);
     border-radius: 24px 24px 0 0;
@@ -1803,7 +1803,9 @@ function filterCouples(key,el) {
 function openAddModal() {
   editingIdx=-1;
   document.getElementById('addModalTitle').textContent='Log a Book';
-  document.getElementById('saveBookBtn').textContent='Save to My Shelf ✨';
+  var sBtn=document.getElementById('saveBookBtn');
+  sBtn.textContent='Save to My Shelf ✨';
+  sBtn.disabled=false;
 
   // Text fields
   document.getElementById('inputTitle').value='';
@@ -1875,7 +1877,7 @@ function openAddModal() {
   const mb = m.querySelector('.modal-body');
   if(mb) mb.scrollTop = 0;
 }
-function closeAddModal() { document.getElementById('addModal').classList.remove('open'); document.body.classList.remove('modal-open'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); document.body.classList.remove('modal-open'); var btn=document.getElementById('saveBookBtn'); if(btn){btn.disabled=false;btn.textContent=btn.textContent.includes('Changes')?'Save Changes ✨':'Save to My Shelf ✨';} }
 
 function setRating(n) {
   currentRating=n;
@@ -2051,7 +2053,9 @@ function openEditModal(idx) {
   const b=books[idx];
   editingIdx=idx;
   document.getElementById('addModalTitle').textContent='Edit Book';
-  document.getElementById('saveBookBtn').textContent='Save Changes ✨';
+  var sBtnE=document.getElementById('saveBookBtn');
+  sBtnE.textContent='Save Changes ✨';
+  sBtnE.disabled=false;
   document.getElementById('inputTitle').value=b.title||'';
   document.getElementById('inputAuthor').value=b.author||'';
   document.getElementById('inputCouple').value=b.couple||'';
