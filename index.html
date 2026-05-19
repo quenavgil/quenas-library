@@ -456,7 +456,7 @@
     align-items: flex-end;
     justify-content: center;
   }
-  .modal-overlay.open { display: flex; }
+  .modal-overlay.open { display: flex; touch-action: none; }
   body.modal-open { overflow: hidden; height: 100%; }
   .modal {
     background: var(--cream);
@@ -1875,7 +1875,7 @@ function openAddModal() {
   const m = document.getElementById('addModal');
   m.classList.add('open'); document.body.classList.add('modal-open');
   const mb = m.querySelector('.modal-body');
-  if(mb) mb.scrollTop = 0;
+  if(mb) { mb.scrollTop = 0; setTimeout(function(){ mb.scrollTop = 0; }, 50); setTimeout(function(){ mb.scrollTop = 0; }, 150); }
 }
 function closeAddModal() { document.getElementById('addModal').classList.remove('open'); document.body.classList.remove('modal-open'); var btn=document.getElementById('saveBookBtn'); if(btn){btn.disabled=false;btn.textContent=btn.textContent.includes('Changes')?'Save Changes ✨':'Save to My Shelf ✨';} }
 
@@ -2125,8 +2125,9 @@ function openEditModal(idx) {
   document.getElementById('detailModal').classList.remove('open'); document.body.classList.remove('modal-open');
   const editModal = document.getElementById('addModal');
   editModal.classList.add('open');
+  document.body.classList.add('modal-open');
   const editBody = editModal.querySelector('.modal-body');
-  if (editBody) setTimeout(function(){ editBody.scrollTop = 0; }, 10);
+  if (editBody) { editBody.scrollTop = 0; setTimeout(function(){ editBody.scrollTop = 0; }, 50); setTimeout(function(){ editBody.scrollTop = 0; }, 150); }
 }
 
 // RE-READ
