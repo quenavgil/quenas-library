@@ -40,9 +40,13 @@
 
   /* TOP NAV */
   .sticky-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
+    max-width: 900px;
+    margin: 0 auto;
   }
   .top-bar {
     background: var(--deep);
@@ -710,6 +714,7 @@
   <div class="tab" onclick="switchTab('tbr')">🔖 TBR</div>
 </div>
 </div>
+<div id="header-spacer"></div>
 
 <!-- LIBRARY TAB -->
 <div class="section active" id="tab-library">
@@ -2428,6 +2433,14 @@ async function maybeSeedData() {
 
 document.addEventListener('DOMContentLoaded', function() {
   maybeSeedData();
+  // Set spacer to match fixed header height
+  function updateSpacer() {
+    var h = document.querySelector('.sticky-header');
+    var s = document.getElementById('header-spacer');
+    if (h && s) s.style.height = h.offsetHeight + 'px';
+  }
+  updateSpacer();
+  window.addEventListener('resize', updateSpacer);
 });
 document.getElementById('addBookBtn').addEventListener('click', function(e) {
   e.stopPropagation();
