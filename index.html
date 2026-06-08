@@ -25,7 +25,8 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  button, [onclick], .tab, .filter-chip, .book-card, .trope-option, .format-btn, .thumb-btn, .couple-book-item, .shelf-book-spine { touch-action: manipulation; cursor: pointer; }
+  button, [onclick], .filter-chip, .book-card, .trope-option, .format-btn, .thumb-btn, .couple-book-item, .shelf-book-spine { touch-action: manipulation; cursor: pointer; }
+  .tab { cursor: pointer; }
   html, body { overscroll-behavior: none; overflow-x: hidden; touch-action: pan-y; }
   html { overflow-x: hidden; }
 
@@ -130,7 +131,10 @@
     gap: 2px;
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
+    overflow-y: hidden;
     scrollbar-width: none;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
   }
   .tabs::-webkit-scrollbar { display: none; }
   .tab {
