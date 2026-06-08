@@ -228,6 +228,16 @@
     border-radius: 10px;
     backdrop-filter: blur(4px);
   }
+  .format-badge {
+    position: absolute;
+    bottom: 6px; right: 6px;
+    background: rgba(61,43,53,0.75);
+    color: white;
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+  }
   .book-info { padding: 7px 8px 9px; }
   .book-title-card {
     font-family: 'Cormorant Garamond', serif;
@@ -1555,13 +1565,14 @@ function renderBooks() {
         progressPct = 'p. ' + b.progress;
       }
     }
+    const formatBadge = (()=>{ const f=b.format; if(f==='audio') return '<div class="format-badge">🎧</div>'; if(f==='ebook') return '<div class="format-badge">📱</div>'; if(f==='fanfic') return '<div class="format-badge">🪶</div>'; return '<div class="format-badge">📚</div>'; })();
     const progressBadge = isReading && progressPct ? `<div class="progress-badge">${progressPct}</div>` : '';
     const bottomInfo = isReading
       ? `<div class="reading-now-pill">📖 currently reading</div>`
       : `<div class="stars-small">${renderStars(b.rating)}</div>${trope?`<div class="trope-pill-small">${trope}</div>`:''}`;
     return `
     <div class="book-card" onclick="openDetail(${realIdx})">
-      <div class="book-cover-wrap">${coverHTML}${ratingBadge}${spicyBadge}${progressBadge}</div>
+      <div class="book-cover-wrap">${coverHTML}${ratingBadge}${spicyBadge}${progressBadge}${formatBadge}</div>
       <div class="book-info">
         <div class="book-title-card">${b.title}</div>
         <div class="book-author-card">${b.author||''}</div>
@@ -2504,8 +2515,7 @@ function renderTBR() {
       + '</div></div></div>';
   }).join('');
 }
-loadTBR();
-renderTBR();
+document.addEventListener('DOMContentLoaded', function() { loadTBR(); renderTBR(); });
 
 
 function toggleDarkMode() {
