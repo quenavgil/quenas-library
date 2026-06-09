@@ -1583,9 +1583,8 @@ function renderBooks() {
         if (!isNaN(pct) && pct > 0) progressPct = pct + '%';
       }
     } else if (isReading && b.progress && b.pages) {
-        var pct = Math.min(Math.round(parseFloat(b.progress)/parseFloat(b.pages)*100), 100);
-        if (!isNaN(pct) && pct > 0) progressPct = pct + '%';
-      }
+      var pct = Math.min(Math.round(parseFloat(b.progress)/parseFloat(b.pages)*100), 100);
+      if (!isNaN(pct) && pct > 0) progressPct = pct + '%';
     } else if (isReading && b.progress && !b.pages) {
       // No total set — show current position only
       if (b.format === 'fanfic') {
